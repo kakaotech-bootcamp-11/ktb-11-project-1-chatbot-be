@@ -37,7 +37,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User getUser(Map<String, Object> attributes) {
-        String socialId =  String.valueOf(attributes.get("id"));
+        Long socialId = (Long) attributes.get("id");
         Map<String, String>  properties = (Map<String, String>) attributes.get("properties");
         User findUser = userRepository.findBysocialId(socialId).orElse(null);
 

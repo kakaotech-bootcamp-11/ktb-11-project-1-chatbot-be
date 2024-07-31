@@ -18,10 +18,10 @@ public class User extends BaseEntity {
 
     private String nickname;
 
-    private String socialId;
+    private Long socialId;
 
     @Builder
-    public User(String nickname, String socialId) {
+    public User(String nickname, Long socialId) {
         this.nickname = nickname;
         this.socialId = socialId;
     }
