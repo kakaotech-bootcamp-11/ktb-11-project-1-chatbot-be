@@ -24,7 +24,7 @@ public abstract class BaseEntity {
     @Column(insertable = false)
     private LocalDateTime deletedAt;
 
-    protected void delete(LocalDateTime currentTime){
+    public void delete(LocalDateTime currentTime){
         if (deletedAt == null){
             deletedAt = currentTime;
         }
