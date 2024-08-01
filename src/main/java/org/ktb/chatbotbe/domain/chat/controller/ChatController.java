@@ -49,7 +49,7 @@ public class ChatController {
     @DeleteMapping("/me/{chatId}")
     public ResponseEntity<String> deleteChat(@AuthenticationPrincipal OAuth2User user, @PathVariable Long chatId) {
         Long userId = user.getAttribute("id");
-        chatService.softDeleteChat(chatId, userId);
+        chatService.deleteChat(chatId, userId);
         return ResponseEntity.ok("성공적으로 채팅 쓰레드를 삭제했습니다.");
     }
 

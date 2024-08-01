@@ -134,7 +134,7 @@ public class ChatService {
         chatMessageRepository.save(aiMessage);
 
         // Chat의 제목을 AI 응답으로 업데이트
-        newChat.setTitle(aiResponseContent);
+        newChat.updateTitle(aiResponseContent);
         chatRepository.save(newChat);
 
         return NewChatResponse.builder()
@@ -147,7 +147,7 @@ public class ChatService {
                 .build();
     }
 
-    public void softDeleteChat(Long chatId, Long userSocialId) {
+    public void deleteChat(Long chatId, Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
 
         Chat chat = chatRepository.findById(chatId)
