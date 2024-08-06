@@ -6,7 +6,6 @@ import org.ktb.chatbotbe.domain.user.entity.User;
 import org.ktb.chatbotbe.global.common.BaseEntity;
 
 @Getter
-//@Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Chat extends BaseEntity {
