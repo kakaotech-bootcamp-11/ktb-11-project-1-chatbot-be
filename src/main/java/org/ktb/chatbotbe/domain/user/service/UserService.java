@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
 
-    public User findBySocialId(Long socilId) {
-        return userRepository.findBysocialId(socilId)
+    public User findBySocialId(Long socialId) {
+        return userRepository.findBysocialId(socialId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
