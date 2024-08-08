@@ -21,7 +21,6 @@ public class Chat extends BaseEntity {
 
     @Builder
     public Chat(User user, Long id, String title) {
-        this.id = id;
         this.user = user;
         this.title = title;
     }
