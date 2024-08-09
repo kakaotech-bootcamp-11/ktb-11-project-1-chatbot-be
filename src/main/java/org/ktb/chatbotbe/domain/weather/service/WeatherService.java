@@ -21,8 +21,31 @@ public class WeatherService {
     private String WeatherAPIKey;
     private final WebClient webClient;
 
+    public NowWeatherResponse getTodayWeather() {
 
-    public List<WeatherInfoPerThreeHour> getTodayWeather() {
+        WeatherResponse nowWeather = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("data/2.5/weather")
+                        .queryParam("lat", latitude)
+                        .queryParam("lon", longitude)
+                        .queryParam("appid", WeatherAPIKey)
+                        .queryParam("units", "metric")
+                        .queryParam("lang", "kr")
+                        .build()
+                )
+                .retrieve()
+                .bodyToMono(WeatherResponse.class)
+                .block();
+
+        Map<String, Object> now = new HashMap<>();
+        now.put("temp", nowWeather.getMain().get("temp"));
+        now.put("temp_min", nowWeather.getMain().get("temp_min"));
+        now.put("temp_max", nowWeather.getMain().get("temp_max"));
+        now.put("description", nowWeather.getWeather().get(0).get("description"));
+        now.put("icon", nowWeather.getWeather().get(0).get("icon"));
+
+
+
         WeekWeatherResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/data/2.5/forecast")
@@ -37,10 +60,14 @@ public class WeatherService {
                 .bodyToMono(WeekWeatherResponse.class)
                 .block();
 
-        return response.getList().stream()
+
+        List<WeatherInfoPerThreeHour> after = response.getList().stream()
                 .map(WeekWeatherResponse.WeekWeatherData::toDto)
-                .limit(10)
+                .limit(7)
                 .toList();
+
+
+        return new NowWeatherResponse(now, after);
     }
 
 }

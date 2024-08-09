@@ -18,7 +18,7 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping()
-    public ResponseEntity<List<WeatherInfoPerThreeHour>> getTodayWeather() {
+    public ResponseEntity<NowWeatherResponse> getTodayWeather() {
         return ResponseEntity.ok().body(weatherService.getTodayWeather());
     }
 
