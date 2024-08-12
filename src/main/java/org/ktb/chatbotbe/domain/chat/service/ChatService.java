@@ -8,6 +8,7 @@ import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.NewChatResponse;
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
 import org.ktb.chatbotbe.domain.chat.entity.ChatMessage;
+import org.ktb.chatbotbe.domain.chat.exception.UnauthorizedUserChatException;
 import org.ktb.chatbotbe.domain.chat.repository.ChatMessageRepository;
 import org.ktb.chatbotbe.domain.chat.repository.ChatRepository;
 import org.ktb.chatbotbe.domain.user.entity.User;
@@ -46,8 +47,8 @@ public class ChatService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid chat ID"));
 
         // 채팅방을 만든 유저가 조회하는 게 아닌 경우
-        if (!userChat.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("User is not authorized to delete this chat");
+        if (!userChat.getUser().equals(user)) {
+            throw new UnauthorizedUserChatException("User is not authorized to delete this chat");
         }
 
         List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatIdOrderByChatIdAsc(chatId);
