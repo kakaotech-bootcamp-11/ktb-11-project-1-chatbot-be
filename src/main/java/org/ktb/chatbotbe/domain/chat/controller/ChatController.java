@@ -1,9 +1,7 @@
 package org.ktb.chatbotbe.domain.chat.controller;
 
-import com.sun.tools.jconsole.JConsoleContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
@@ -28,6 +26,7 @@ public class ChatController {
     public ResponseEntity<List<ChatResponse>> getChatTitles(@AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
 
+//        return ResponseEntity.status(HttpStatus.OK).body(chatService.findChatTitles(userId));
         return ResponseEntity.ok(chatService.findChatTitles(userId));
     }
 

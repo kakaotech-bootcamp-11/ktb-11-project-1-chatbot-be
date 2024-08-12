@@ -1,22 +1,15 @@
 package org.ktb.chatbotbe.global.config;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.filters.CorsFilter;
 import org.ktb.chatbotbe.global.oauth.CustomOAuth2UserService;
 import org.ktb.chatbotbe.global.oauth.handler.OAuth2FailureHandler;
 import org.ktb.chatbotbe.global.oauth.handler.OAuth2SuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,7 +20,6 @@ public class SecurityConfig {
 
     @Value("${spring.security.oauth2.home}")
     private String homepageUrl;
-
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,8 +36,7 @@ public class SecurityConfig {
 
                 // 인가가 있는 사용자에 대해 접근권한 확인
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/oauth2/**", "/success", "/login/**", "/api/chats", "/api/weather/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/success", "/login/**", "/api/chats").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login((oauth) -> oauth
@@ -58,7 +49,7 @@ public class SecurityConfig {
                                 .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                         .userService(customOAuth2UserService))
                                 .successHandler(successHandler)
-//                                .failureHandler(failureHandler)
+                                .failureHandler(failureHandler)
                 )
                 // 로그아웃
                 .logout(logout -> logout
@@ -70,6 +61,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
 }
