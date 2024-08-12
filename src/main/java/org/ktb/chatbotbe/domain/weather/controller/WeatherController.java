@@ -1,7 +1,8 @@
 package org.ktb.chatbotbe.domain.weather.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.ktb.chatbotbe.domain.weather.service.WeatherInfoPerThreeHour;
+import org.ktb.chatbotbe.domain.weather.dto.DailyWeatherResponse;
+import org.ktb.chatbotbe.domain.weather.dto.WeeklyWeatherResponse;
 import org.ktb.chatbotbe.domain.weather.service.WeatherService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +19,14 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping()
-    public ResponseEntity<NowWeatherResponse> getTodayWeather() {
+    public ResponseEntity<DailyWeatherResponse> getTodayWeather() {
         return ResponseEntity.ok().body(weatherService.getTodayWeather());
     }
+
+    @GetMapping("/week")
+    public ResponseEntity<List<WeeklyWeatherResponse>> getWeekWeather() {
+        return ResponseEntity.ok(weatherService.getWeekWeather());
+    }
+
 
 }

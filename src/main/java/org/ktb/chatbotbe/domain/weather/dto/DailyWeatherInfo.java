@@ -1,4 +1,4 @@
-package org.ktb.chatbotbe.domain.weather.service;
+package org.ktb.chatbotbe.domain.weather.dto;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class WeatherResponse {
+public class DailyWeatherInfo {
     private Map<String, String> coord;
     private List<Map<String, Object>> weather;
     private String base;
