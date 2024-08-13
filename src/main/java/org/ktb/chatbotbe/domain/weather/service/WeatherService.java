@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 
@@ -27,11 +29,11 @@ public class WeatherService {
     public DailyWeatherResponse getTodayWeather() {
         DailyWeatherInfo nowWeather = getDailyWeatherInfo();
         WeeklyWeatherInfo response = getWeeklyWeatherInfo();
-        Map<String, Object> now = convertDailyWeather(nowWeather);
+        PreprocessedDailyWeather now = convertDailyWeather(nowWeather);
         List<WeatherInfoPerThreeHour> after = convertWeeklyWeatherInfo(response, 7);
-
         return new DailyWeatherResponse(now, after);
     }
+
 
     public List<WeeklyWeatherResponse> getWeekWeather() {
         WeeklyWeatherInfo response = getWeeklyWeatherInfo();
@@ -50,29 +52,42 @@ public class WeatherService {
 
         map.forEach((key, value) -> {
             String icon;
+            String description;
             double dayMinTemp = Double.MAX_VALUE;
             double dayMaxTemp = -Double.MAX_VALUE;
             Double avgTemp = (double) 0;
-            Double avgRain = (double) 0;
+            Long avgHumidity = (long) 0;
+            LocalDate date = value.get(0).dateTime().toLocalDate();
 
             for (WeatherInfoPerThreeHour data : value) {
                 dayMinTemp = Double.min(dayMinTemp, data.tempMin());
                 dayMaxTemp = Double.max(dayMaxTemp, data.tempMax());
                 avgTemp += data.temp();
-                avgRain += data.rian();
+                avgHumidity += data.humidity();
             }
 
             avgTemp = avgTemp / value.size();
             avgTemp = Math.round(avgTemp * 100.00) / 100.00;
-            avgRain = avgRain / value.size();
-            avgRain = Math.round(avgRain * 100.00) / 100.00;
+            avgHumidity = avgHumidity / value.size();
+
             if (value.get(2) != null) {
-                 icon = value.get(2).weatherIcon();
+                icon = value.get(2).weatherIcon();
+                description = value.get(2).description();
             } else {
                 icon = value.get(0).weatherIcon();
+                description = value.get(0).description();
             }
 
-            result.add(new WeeklyWeatherResponse(key, icon, avgTemp, dayMinTemp, dayMaxTemp, avgRain));
+            result.add(WeeklyWeatherResponse.builder()
+                    .day(key)
+                    .date(date)
+                    .icon(icon)
+                    .avg_temp(avgTemp)
+                    .max_temp(dayMaxTemp)
+                    .min_temp(dayMinTemp)
+                    .humidity(avgHumidity)
+                    .description(description)
+                    .build());
         });
 
         return result;
@@ -110,14 +125,15 @@ public class WeatherService {
                 .block();
     }
 
-    private Map<String, Object> convertDailyWeather(DailyWeatherInfo nowWeather) {
-        Map<String, Object> now = new HashMap<>();
-        now.put("temp", nowWeather.getMain().get("temp"));
-        now.put("temp_min", nowWeather.getMain().get("temp_min"));
-        now.put("temp_max", nowWeather.getMain().get("temp_max"));
-        now.put("description", nowWeather.getWeather().get(0).get("description"));
-        now.put("icon", nowWeather.getWeather().get(0).get("icon"));
-        return now;
+    private PreprocessedDailyWeather convertDailyWeather(DailyWeatherInfo nowWeather) {
+        return PreprocessedDailyWeather.builder()
+                .temp((Double) nowWeather.getMain().get("temp"))
+                .tempMin((Double) nowWeather.getMain().get("temp_min"))
+                .tempMax((Double) nowWeather.getMain().get("temp_max"))
+                .description((String) nowWeather.getWeather().get(0).get("description"))
+                .icon((String) nowWeather.getWeather().get(0).get("icon"))
+                .build();
+
     }
 
     private List<WeatherInfoPerThreeHour> convertWeeklyWeatherInfo(WeeklyWeatherInfo response) {

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
 import org.ktb.chatbotbe.domain.chat.entity.ChatMessage;
 import org.ktb.chatbotbe.domain.chat.exception.UnauthorizedUserChatException;
@@ -17,7 +18,10 @@ import org.ktb.chatbotbe.domain.user.service.UserService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.convert.DataSizeUnit;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,47 +45,69 @@ class ChatServiceTest {
     @InjectMocks
     ChatService chatService;
 
-    @DisplayName("findChatMessagesByChatId()는 ")
+    @DisplayName("findChatTitles()는 ")
     @Nested
-    class Context_findChatMessageByChatId {
-
-        @DisplayName("채팅메세지를 성공적으로 가져온다")
+    class Context_findChatTitles {
+        @DisplayName("채팅제목을 성공적으로 가져온다.")
         @Test
         void _willSuccess() {
             // given
-            Long chatId = 1L;
-            Long userSocialId = 3L;
-            User chatUser = mock(User.class);
-            Chat chat = mock(Chat.class);
-            List<ChatMessage> chatMessages = List.of(
-                    ChatMessage.builder()
-                            .chatMessageId(1L)
-                            .chat(chat)
-                            .content("안녕하세요! 일단 테스트입니다")
-                            .isUser(true)
-                            .build()
-                    , ChatMessage.builder()
-                            .chatMessageId(2L)
-                            .chat(chat)
-                            .content("안녕하세요! AI입니다")
-                            .isUser(false)
-                            .build()
-            );
-            when(userService.findBySocialId(anyLong())).thenReturn(chatUser);
-            when(chatRepository.findById(anyLong())).thenReturn(Optional.of(chat));
-            when(chat.getUser()).thenReturn(chatUser);
-            when(chatMessageRepository.findAllByChatIdOrderByChatIdAsc(anyLong())).thenReturn(chatMessages);
+            User user = mock(User.class);
+            Chat chat1 = Chat.builder()
+                    .user(user)
+                    .title("test1")
+                    .build();
+
+            Chat chat2 = Chat.builder()
+                    .user(user)
+                    .title("test2")
+                    .build();
+
+            when(userService.findBySocialId(anyLong())).thenReturn(user);
+            when(chatRepository.findAllByUser(user)).thenReturn(List.of(chat1, chat2));
 
             // when
-            List<ChatMessageResponse> responses = chatService.findChatMessagesByChatId(chatId, userSocialId);
+            List<ChatResponse> responses = chatService.findChatTitles(1L);
 
             // then
-            assertEquals(2, responses.size());
-            assertEquals(1L, responses.get(0).getChatMessageId());
+            assertEquals(responses.size(), 2);
+            assertEquals(responses.get(0).title(), chat1.getTitle());
+            assertEquals(responses.get(1).title(), chat2.getTitle());
+        }
+
+        @DisplayName("삭제된 채팅은 가져오지 않는다.")
+        @Test
+        void _shouldNotReturnDeletedChats() {
+            // given
+            User user = mock(User.class);
+            Chat chat1 = Chat.builder()
+                    .user(user)
+                    .title("test1")
+                    .build();
+
+            Chat chat2 = Chat.builder()
+                    .user(user)
+                    .title("test2")
+                    .build();
+
+            chat2.delete(LocalDateTime.now());
+
+            when(userService.findBySocialId(anyLong())).thenReturn(user);
+            when(chatRepository.findAllByUser(user)).thenReturn(List.of(chat1));
+
+            // when
+            List<ChatResponse> responses = chatService.findChatTitles(1L);
+
+            // then
+            assertEquals(responses.size(), 1);
+            assertEquals(responses.get(0).title(), chat1.getTitle());
+        }
+    }
+
+
+
             assertEquals("안녕하세요! 일단 테스트입니다", responses.get(0).getContent());
             assertTrue(responses.get(0).getIsUser());
-
-            assertEquals(2L, responses.get(1).getChatMessageId());
             assertEquals("안녕하세요! AI입니다", responses.get(1).getContent());
             assertFalse(responses.get(1).getIsUser());
 
@@ -104,7 +130,6 @@ class ChatServiceTest {
 
             Long chatId = 1L;
             Chat chat = Chat.builder()
-                    .id(chatId)
                     .title("test title")
                     .user(chatUser)
                     .build();

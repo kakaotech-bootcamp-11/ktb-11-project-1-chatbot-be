@@ -1,14 +1,18 @@
 package org.ktb.chatbotbe.domain.weather.dto;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
+@Builder
 public record WeatherInfoPerThreeHour(
         Double temp,
         Double tempMin,
         Double tempMax,
-        Double rian,
+        Long humidity,
         String weatherIcon,
-        LocalDateTime dateTime
+        LocalDateTime dateTime,
+        String description
 ) {
 
 }
