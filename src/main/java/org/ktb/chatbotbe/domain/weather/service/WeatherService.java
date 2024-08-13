@@ -29,15 +29,13 @@ public class WeatherService {
     public DailyWeatherResponse getTodayWeather() {
         DailyWeatherInfo nowWeather = getDailyWeatherInfo();
         WeeklyWeatherInfo response = getWeeklyWeatherInfo();
-        Map<String, Object> now = convertDailyWeather(nowWeather);
+        PreprocessedDailyWeather now = convertDailyWeather(nowWeather);
         List<WeatherInfoPerThreeHour> after = convertWeeklyWeatherInfo(response, 7);
-
         return new DailyWeatherResponse(now, after);
     }
 
 
     public List<WeeklyWeatherResponse> getWeekWeather() {
-        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         WeeklyWeatherInfo response = getWeeklyWeatherInfo();
         List<WeatherInfoPerThreeHour> weatherData = convertWeeklyWeatherInfo(response);
 
@@ -60,7 +58,6 @@ public class WeatherService {
             Double avgTemp = (double) 0;
             Long avgHumidity = (long) 0;
             LocalDate date = value.get(0).dateTime().toLocalDate();
-
 
             for (WeatherInfoPerThreeHour data : value) {
                 dayMinTemp = Double.min(dayMinTemp, data.tempMin());
@@ -128,14 +125,15 @@ public class WeatherService {
                 .block();
     }
 
-    private Map<String, Object> convertDailyWeather(DailyWeatherInfo nowWeather) {
-        Map<String, Object> now = new HashMap<>();
-        now.put("temp", nowWeather.getMain().get("temp"));
-        now.put("temp_min", nowWeather.getMain().get("temp_min"));
-        now.put("temp_max", nowWeather.getMain().get("temp_max"));
-        now.put("description", nowWeather.getWeather().get(0).get("description"));
-        now.put("icon", nowWeather.getWeather().get(0).get("icon"));
-        return now;
+    private PreprocessedDailyWeather convertDailyWeather(DailyWeatherInfo nowWeather) {
+        return PreprocessedDailyWeather.builder()
+                .temp((Double) nowWeather.getMain().get("temp"))
+                .tempMin((Double) nowWeather.getMain().get("temp_min"))
+                .tempMax((Double) nowWeather.getMain().get("temp_max"))
+                .description((String) nowWeather.getWeather().get(0).get("description"))
+                .icon((String) nowWeather.getWeather().get(0).get("icon"))
+                .build();
+
     }
 
     private List<WeatherInfoPerThreeHour> convertWeeklyWeatherInfo(WeeklyWeatherInfo response) {
