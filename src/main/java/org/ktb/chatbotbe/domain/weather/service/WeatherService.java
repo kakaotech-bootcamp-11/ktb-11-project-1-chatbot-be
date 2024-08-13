@@ -72,7 +72,7 @@ public class WeatherService {
                 icon = value.get(0).weatherIcon();
             }
 
-            result.add(new WeeklyWeatherResponse(key, icon, avgTemp, dayMinTemp, dayMaxTemp, avgRain));
+            result.add(new WeeklyWeatherResponse(key, icon, avgTemp, dayMaxTemp, dayMinTemp, avgRain));
         });
 
         return result;

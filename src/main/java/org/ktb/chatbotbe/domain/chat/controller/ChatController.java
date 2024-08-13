@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,10 +49,11 @@ public class ChatController {
     }
 
     @DeleteMapping("/me/{chatId}")
-    public ResponseEntity<String> deleteChat(@AuthenticationPrincipal OAuth2User user, @PathVariable Long chatId) {
+    public ResponseEntity<Map<String, String>> deleteChat(@AuthenticationPrincipal OAuth2User user, @PathVariable Long chatId) {
         Long userId = user.getAttribute("id");
+//        log.info(userId.toString());
         chatService.deleteChat(chatId, userId);
-        return ResponseEntity.ok("성공적으로 채팅 쓰레드를 삭제했습니다.");
+        return ResponseEntity.ok(Map.of("message", "성공적으로 채팅 쓰레드를 삭제했습니다."));
     }
 
     @PostMapping("/me/new")
