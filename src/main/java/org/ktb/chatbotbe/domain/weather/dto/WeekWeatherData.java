@@ -28,8 +28,17 @@ public class WeekWeatherData {
         String weatherIcon = weather.get(0).get("icon").toString();
         LocalDateTime dateTime = LocalDateTime.parse(dt_txt, DATE_TIME_FORMATTER);
         dateTime = dateTime.plusHours(9);
-        Double rainValue = (rain != null && rain.get("3h") != null) ? rain.get("3h") : 0.0;
+        Long humidity = main.get("humidity").longValue();
+        String description = weather.get(0).get("description").toString();
 
-        return new WeatherInfoPerThreeHour(temp, tempMin, tempMax, rainValue, weatherIcon, dateTime);
+        return WeatherInfoPerThreeHour.builder()
+                .temp(temp)
+                .tempMin(tempMin)
+                .tempMax(tempMax)
+                .humidity(humidity)
+                .weatherIcon(weatherIcon)
+                .dateTime(dateTime)
+                .description(description)
+                .build();
     }
 }

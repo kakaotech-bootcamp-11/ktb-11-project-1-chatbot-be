@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 
@@ -33,7 +35,9 @@ public class WeatherService {
         return new DailyWeatherResponse(now, after);
     }
 
+
     public List<WeeklyWeatherResponse> getWeekWeather() {
+        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         WeeklyWeatherInfo response = getWeeklyWeatherInfo();
         List<WeatherInfoPerThreeHour> weatherData = convertWeeklyWeatherInfo(response);
 
@@ -50,29 +54,43 @@ public class WeatherService {
 
         map.forEach((key, value) -> {
             String icon;
+            String description;
             double dayMinTemp = Double.MAX_VALUE;
             double dayMaxTemp = -Double.MAX_VALUE;
             Double avgTemp = (double) 0;
-            Double avgRain = (double) 0;
+            Long avgHumidity = (long) 0;
+            LocalDate date = value.get(0).dateTime().toLocalDate();
+
 
             for (WeatherInfoPerThreeHour data : value) {
                 dayMinTemp = Double.min(dayMinTemp, data.tempMin());
                 dayMaxTemp = Double.max(dayMaxTemp, data.tempMax());
                 avgTemp += data.temp();
-                avgRain += data.rian();
+                avgHumidity += data.humidity();
             }
 
             avgTemp = avgTemp / value.size();
             avgTemp = Math.round(avgTemp * 100.00) / 100.00;
-            avgRain = avgRain / value.size();
-            avgRain = Math.round(avgRain * 100.00) / 100.00;
+            avgHumidity = avgHumidity / value.size();
+
             if (value.get(2) != null) {
-                 icon = value.get(2).weatherIcon();
+                icon = value.get(2).weatherIcon();
+                description = value.get(2).description();
             } else {
                 icon = value.get(0).weatherIcon();
+                description = value.get(0).description();
             }
 
-            result.add(new WeeklyWeatherResponse(key, icon, avgTemp, dayMaxTemp, dayMinTemp, avgRain));
+            result.add(WeeklyWeatherResponse.builder()
+                    .day(key)
+                    .date(date)
+                    .icon(icon)
+                    .avg_temp(avgTemp)
+                    .max_temp(dayMaxTemp)
+                    .min_temp(dayMinTemp)
+                    .humidity(avgHumidity)
+                    .description(description)
+                    .build());
         });
 
         return result;
