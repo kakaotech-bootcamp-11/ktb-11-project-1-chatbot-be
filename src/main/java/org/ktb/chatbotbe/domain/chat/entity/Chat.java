@@ -20,7 +20,7 @@ public class Chat extends BaseEntity {
     private String title;
 
     @Builder
-    public Chat(User user, Long id, String title) {
+    public Chat(User user, String title) {
         this.user = user;
         this.title = title;
     }
