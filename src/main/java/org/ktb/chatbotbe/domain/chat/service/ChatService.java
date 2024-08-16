@@ -2,6 +2,7 @@ package org.ktb.chatbotbe.domain.chat.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
@@ -14,20 +15,23 @@ import org.ktb.chatbotbe.domain.chat.repository.ChatRepository;
 import org.ktb.chatbotbe.domain.user.entity.User;
 import org.ktb.chatbotbe.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class ChatService {
 
     private final ChatRepository chatRepository;
     private final UserService userService;
     private final ChatMessageRepository chatMessageRepository;
+    private final WebClient chatWebClient;
 
     public List<ChatResponse> findChatTitles(Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
@@ -72,19 +76,16 @@ public class ChatService {
         if (!chat.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("User is not authorized to delete this chat");
         }
-
+        String userContent = chatMessageRequest.getContent();
         ChatMessage userMessage = ChatMessage.builder()
                 .chat(chat)
-                .content(chatMessageRequest.getContent())
+                .content(userContent)
                 .isUser(true)
                 .build();
         chatMessageRepository.save(userMessage);
 
-        // AI 서버 호출 (지금은 dummy response)
-        // String aiResponseContent = callAiServer(chatMessageRequest.getContent());
 
-        // 더미 AI 응답
-        String aiResponseContent = "안녕하세요 카테부 AI 챗봇입니다.";
+        String aiResponseContent = callAiServer(userContent);
 
         // AI 응답 저장
         ChatMessage aiMessage = ChatMessage.builder()
@@ -102,10 +103,12 @@ public class ChatService {
                 .build();
     }
 
+
     public NewChatResponse createNewChat(ChatMessageCreateRequest chatMessageRequest, Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
 
         // 새로운 Chat 생성
+        // todo
         Chat newChat = Chat.builder()
                 .user(user)
                 .title("New Chat")
@@ -113,18 +116,17 @@ public class ChatService {
         chatRepository.save(newChat);
 
         // 사용자의 첫 번째 메시지 생성 및 저장
+        String userContent = chatMessageRequest.getContent();
         ChatMessage userMessage = ChatMessage.builder()
                 .chat(newChat)
-                .content(chatMessageRequest.getContent())
+                .content(userContent)
                 .isUser(true)
                 .build();
         chatMessageRepository.save(userMessage);
 
         // AI 서버 호출 (지금은 dummy response)
-        // String aiResponseContent = callAiServer(chatMessageRequest.getContent());
+         String aiResponseContent = callAiServer(userContent);
 
-        // 더미 AI 응답
-        String aiResponseContent = "안녕하세요, 새로운 채팅 쓰레드입니다.";
 
         // AI 응답 메시지 생성 및 저장
         ChatMessage aiMessage = ChatMessage.builder()
@@ -160,5 +162,17 @@ public class ChatService {
 
         chat.delete(LocalDateTime.now());
         chatRepository.save(chat);
+    }
+
+    private String callAiServer(String message) {
+        Flux<String> responseFlux = chatWebClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/test")
+                        .build())
+                .header("Content-Type", "application/json")
+                .bodyValue(String.format("{\"content\":\"%s\"}", message))
+                .retrieve().bodyToFlux(String.class);
+
+        return responseFlux.blockLast();        // 동기적으로 사용
     }
 }

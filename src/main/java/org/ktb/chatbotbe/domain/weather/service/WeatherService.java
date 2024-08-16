@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 
@@ -24,7 +23,7 @@ public class WeatherService {
     private Double longitude;
     @Value("${weather.api-key}")
     private String WeatherAPIKey;
-    private final WebClient webClient;
+    private final WebClient weatherWebClient;
 
     public DailyWeatherResponse getTodayWeather() {
         DailyWeatherInfo nowWeather = getDailyWeatherInfo();
@@ -94,7 +93,7 @@ public class WeatherService {
     }
 
     private DailyWeatherInfo getDailyWeatherInfo() {
-        return webClient.get()
+        return weatherWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("data/2.5/weather")
                         .queryParam("lat", latitude)
@@ -110,7 +109,7 @@ public class WeatherService {
     }
 
     private WeeklyWeatherInfo getWeeklyWeatherInfo() {
-        return webClient.get()
+        return weatherWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/data/2.5/forecast")
                         .queryParam("lat", latitude)
