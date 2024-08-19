@@ -1,25 +1,26 @@
 package org.ktb.chatbotbe.global.oauth;
 
-import lombok.extern.slf4j.Slf4j;
+import org.ktb.chatbotbe.domain.user.entity.CommentStarter;
 import org.ktb.chatbotbe.domain.user.entity.User;
+import org.ktb.chatbotbe.domain.user.repository.CommentStarterRepository;
 import org.ktb.chatbotbe.domain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private DefaultErrorAttributes errorAttributes;
+    private CommentStarterRepository commentStarterRepository;
 
     public CustomOAuth2UserService() {
         super();
@@ -46,7 +47,24 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .nickname(properties.get("nickname"))
                     .socialId(socialId)
                     .build();
-            return userRepository.save(createUser);
+            userRepository.save(createUser);
+            commentStarterRepository.saveAll(
+                    List.of(
+                            CommentStarter.builder()
+                                    .comment("오늘 날씨에 맞는 음식 추천해줘")
+                                    .user(createUser)
+                                    .build(),
+                            CommentStarter.builder()
+                                    .comment("집 어떻게 가야할지 추천해줘")
+                                    .user(createUser)
+                                    .build(),
+                            CommentStarter.builder()
+                                    .comment("가장 빠른 코딩테스트 날짜가 언제야?")
+                                    .user(createUser)
+                                    .build())
+                    );
+
+            return createUser;
         }
 
         return findUser;

@@ -1,9 +1,6 @@
 package org.ktb.chatbotbe.domain.chat.controller;
 
-import com.sun.tools.jconsole.JConsoleContext;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/chats")
 @RestController
@@ -28,7 +24,6 @@ public class ChatController {
     @GetMapping("/me/titles")
     public ResponseEntity<List<ChatResponse>> getChatTitles(@AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
-
         return ResponseEntity.ok(chatService.findChatTitles(userId));
     }
 
@@ -43,7 +38,6 @@ public class ChatController {
     @PostMapping("/me/{chatId}/messages")
     public ResponseEntity<ChatMessageResponse> addChatMessage(@PathVariable Long chatId, @RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
-        log.info(userId.toString());
         ChatMessageResponse chatMessageResponse = chatService.addChatMessage(chatId, chatMessageRequest, userId);
         return ResponseEntity.ok(chatMessageResponse);
     }
@@ -51,7 +45,6 @@ public class ChatController {
     @DeleteMapping("/me/{chatId}")
     public ResponseEntity<Map<String, String>> deleteChat(@AuthenticationPrincipal OAuth2User user, @PathVariable Long chatId) {
         Long userId = user.getAttribute("id");
-//        log.info(userId.toString());
         chatService.deleteChat(chatId, userId);
         return ResponseEntity.ok(Map.of("message", "성공적으로 채팅 쓰레드를 삭제했습니다."));
     }

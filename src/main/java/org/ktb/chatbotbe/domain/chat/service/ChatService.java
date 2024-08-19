@@ -125,9 +125,8 @@ public class ChatService {
         chatMessageRepository.save(userMessage);
 
         // AI 서버 호출 (지금은 dummy response)
-         String aiResponseContent = callAiServer(userContent);
-
-
+        String aiResponseContent = callAiServer(userContent);
+//        String chatTile = callAiServer(aiResponseContent);
         // AI 응답 메시지 생성 및 저장
         ChatMessage aiMessage = ChatMessage.builder()
                 .chat(newChat)
@@ -141,6 +140,7 @@ public class ChatService {
         chatRepository.save(newChat);
 
         return NewChatResponse.builder()
+                .title("test")
                 .chatId(newChat.getId())
                 .aiResponse(ChatMessageResponse.builder()
                         .chatMessageId(aiMessage.getChatMessageId())
