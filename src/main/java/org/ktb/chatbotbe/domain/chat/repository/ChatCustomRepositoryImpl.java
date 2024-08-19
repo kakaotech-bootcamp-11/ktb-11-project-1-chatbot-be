@@ -16,7 +16,6 @@ import static org.ktb.chatbotbe.domain.chat.entity.QChat.chat;
 public class ChatCustomRepositoryImpl implements ChatCustomRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-
     @Override
     public List<Chat> findAllByUser(User user) {
         BooleanBuilder builder = new BooleanBuilder();
