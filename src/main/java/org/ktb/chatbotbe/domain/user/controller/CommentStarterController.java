@@ -28,10 +28,10 @@ public class CommentStarterController {
     }
 
     @PutMapping
-    public ResponseEntity<UpdateResponse> getCommentStartersByUser(@AuthenticationPrincipal OAuth2User user,
-                                                                   @RequestBody UpdateCommentRequest request) {
+    public ResponseEntity<List<UpdateResponse>> getCommentStartersByUser(@AuthenticationPrincipal OAuth2User user,
+                                                                         @RequestBody List<UpdateCommentRequest> request) {
         Long userId = user.getAttribute("id");
-        UpdateResponse updateResponse = commentStarterService.updateComment(userId, request.getId(), request.getComment());
+        List<UpdateResponse> updateResponse = commentStarterService.updateComment(userId, request);
         return ResponseEntity.ok(updateResponse);
     }
 }

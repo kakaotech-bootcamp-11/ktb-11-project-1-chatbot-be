@@ -1,23 +1,22 @@
 package org.ktb.chatbotbe.domain.user.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.ktb.chatbotbe.domain.user.Exception.UserNotFoundException;
 import org.ktb.chatbotbe.domain.user.dto.CommentResponse;
+import org.ktb.chatbotbe.domain.user.dto.UpdateCommentRequest;
 import org.ktb.chatbotbe.domain.user.dto.UpdateResponse;
 import org.ktb.chatbotbe.domain.user.entity.CommentStarter;
 import org.ktb.chatbotbe.domain.user.entity.User;
 import org.ktb.chatbotbe.domain.user.repository.CommentStarterRepository;
-import org.ktb.chatbotbe.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
 public class CommentStarterService {
     private final CommentStarterRepository commentStarterRepository;
     private final UserService userService;
@@ -36,13 +35,24 @@ public class CommentStarterService {
         return response;
     }
 
-    public UpdateResponse updateComment(Long userId, Long commentId, String comment) {
+    public List<UpdateResponse> updateComment(Long userId, List<UpdateCommentRequest> requests) {
         User user = userService.findBySocialId(userId);
-        CommentStarter commentStarter = commentStarterRepository.findByUserAndId(user, commentId).orElseThrow();
-        commentStarter.updateComment(comment);
-        return UpdateResponse.builder()
-                .comment(commentStarter.getComment())
-                .build();
+
+        return requests.stream()
+                .map(request -> {
+                    CommentStarter commentStarter = commentStarterRepository
+                            .findByUserAndId(user, request.getId())
+                            .orElseThrow(() -> new EntityNotFoundException("CommentStarter not found for id: " + request.getId()));
+
+                    commentStarter.updateComment(request.getComment());
+
+                    return UpdateResponse.builder()
+                            .id(commentStarter.getId())
+                            .comment(commentStarter.getComment())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
+
 }
 
