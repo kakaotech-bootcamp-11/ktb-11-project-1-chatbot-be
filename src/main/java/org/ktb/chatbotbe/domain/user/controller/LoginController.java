@@ -2,7 +2,6 @@ package org.ktb.chatbotbe.domain.user.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.user.entity.User;
 import org.ktb.chatbotbe.domain.user.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

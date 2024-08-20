@@ -1,7 +1,6 @@
 package org.ktb.chatbotbe.global.config;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.filters.CorsFilter;
 import org.ktb.chatbotbe.global.oauth.CustomOAuth2UserService;
 import org.ktb.chatbotbe.global.oauth.handler.OAuth2FailureHandler;
 import org.ktb.chatbotbe.global.oauth.handler.OAuth2SuccessHandler;
@@ -11,12 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,6 +19,7 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler successHandler;
     private final OAuth2FailureHandler failureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final AuthenticationEntryPoint entryPoint;
 
     @Value("${spring.security.oauth2.home}")
     private String homepageUrl;
@@ -31,23 +27,19 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         // 경로별 인가작업
         http
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-
-                // Spring Security 세션으로 인증된 사용자 상태 유지
-                // @AuthenticationPrincipal 통해서 정보 안가져옴
-//                .sessionManagement(session -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 // 인가가 있는 사용자에 대해 접근권한 확인
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/oauth2/**", "/success", "/login/**", "/api/chats", "/api/weather/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
+//                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
                 .oauth2Login((oauth) -> oauth
                                 .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
                                                 // baseUri로 들어오는 요청을 redirectionEndpoint에 설정된 곳으로 리디렉트
@@ -58,7 +50,7 @@ public class SecurityConfig {
                                 .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                         .userService(customOAuth2UserService))
                                 .successHandler(successHandler)
-//                                .failureHandler(failureHandler)
+                                .failureHandler(failureHandler)
                 )
                 // 로그아웃
                 .logout(logout -> logout
