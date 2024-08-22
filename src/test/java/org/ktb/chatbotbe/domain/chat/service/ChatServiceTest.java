@@ -5,8 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.NewChatResponse;
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
 import org.ktb.chatbotbe.domain.chat.entity.ChatMessage;
 import org.ktb.chatbotbe.domain.chat.exception.UnauthorizedUserChatException;
@@ -17,6 +19,7 @@ import org.ktb.chatbotbe.domain.user.repository.UserRepository;
 import org.ktb.chatbotbe.domain.user.service.UserService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -25,8 +28,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,9 @@ class ChatServiceTest {
     UserService userService;
     @InjectMocks
     ChatService chatService;
+    @Spy
+    @InjectMocks
+    ChatService spyChatService;
 
     @DisplayName("findChatTitles()는 ")
     @Nested
@@ -179,5 +184,106 @@ class ChatServiceTest {
             });
         }
 
+    }
+
+    @DisplayName("addChatMessage()는 ")
+    @Nested
+    class Context_addChatMessage {
+        @DisplayName("성공적으로 메시지를 추가한다.")
+        @Test
+        void _willSuccess() {
+            // given
+            Long chatId = 1L;
+            Long userSocialId = 3L;
+            String userComment = "응답해줘";
+            ChatMessageCreateRequest chatMessageRequest = new ChatMessageCreateRequest();
+            chatMessageRequest.setContent(userComment);
+
+            User user = mock(User.class);
+            Chat chat = mock(Chat.class);
+            when(userService.findBySocialId(anyLong())).thenReturn(user);
+            when(chatRepository.findById(anyLong())).thenReturn(Optional.of(chat));
+            when(chat.getUser()).thenReturn(user);
+            when(chat.getUser().getId()).thenReturn(1L);
+            when(user.getId()).thenReturn(1L);
+
+            doReturn("ai response").when(spyChatService).callAiServer(userComment);
+
+            // when
+            ChatMessageResponse response = spyChatService.addChatMessage(chatId, chatMessageRequest, userSocialId);
+
+            // then
+            assertNotNull(response);
+            assertEquals(response.getIsUser(), false);
+            assertEquals(response.getContent(), "ai response");
+
+        }
+    }
+
+    @DisplayName("createNewChat()은 ")
+    @Nested
+    class Context_CreateNewChat {
+        @DisplayName("성공적으로 새로운 채팅방을 만든다")
+        @Test
+        void _willSuccess() {
+            // given
+            Long userSocialId = 3L;
+            String userComment = "test content";
+
+            ChatMessageCreateRequest chatMessageRequest = new ChatMessageCreateRequest();
+            chatMessageRequest.setContent(userComment);
+            User user = mock(User.class);
+            Chat chat = mock(Chat.class);
+
+            when(userService.findBySocialId(anyLong())).thenReturn(user);
+
+            doReturn("ai response").when(spyChatService).callAiServer(userComment);
+
+            // when
+            NewChatResponse response = spyChatService.createNewChat(chatMessageRequest, userSocialId);
+
+            // then
+            assertEquals(response.getTitle(), "ai title");
+            assertEquals(response.getAiResponse().getContent(), "ai response");
+            assertEquals(response.getAiResponse().getIsUser(), false);
+        }
+    }
+
+    @DisplayName("deleteChat()은 ")
+    @Nested
+    class Context_deleteChat {
+        @DisplayName("성공적으로 채팅방을 삭제한다.")
+        @Test
+        void _willSuccess() {
+            // given
+
+            // when
+
+            // then
+        }
+
+        @DisplayName("사용자가 다른경우 IllegalArgumentException을 던진다")
+        @Test
+        void itShouldThrowIllegalArgumentException() {
+            // given
+            Chat chat = mock(Chat.class);
+            User chatUser = mock(User.class);
+            User user = mock(User.class);
+            Long chatId = 1L;
+            Long userSocialId = 3L;
+
+            when(userService.findBySocialId(anyLong())).thenReturn(user);
+            when(chatRepository.findById(anyLong())).thenReturn(Optional.of(chat));
+            when(chat.getUser()).thenReturn(chatUser);
+            when(chat.getUser().getId()).thenReturn(1L);
+            when(user.getId()).thenReturn(3L);
+
+            // when
+            // then
+            assertThrows(IllegalArgumentException.class, () -> {
+                chatService.deleteChat(chatId, userSocialId);
+            });
+
+        }
     }
 }
