@@ -22,6 +22,7 @@ public class WebClientConfig {
     @Bean
     public WebClient chatWebClient(WebClient.Builder webClientBuilder) {
         return webClientBuilder
-                .baseUrl(chatServerURI)              .build();
+                .baseUrl(chatServerURI)
+                .build();
     }
 }
