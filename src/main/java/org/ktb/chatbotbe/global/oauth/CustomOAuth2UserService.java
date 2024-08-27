@@ -46,7 +46,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User createUser = User.builder()
                     .nickname(properties.get("nickname"))
                     .socialId(socialId)
-                    .profileImage(properties.get("profile_image"))
                     .build();
             userRepository.save(createUser);
             commentStarterRepository.saveAll(

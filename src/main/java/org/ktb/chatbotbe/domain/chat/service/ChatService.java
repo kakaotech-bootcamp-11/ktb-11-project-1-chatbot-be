@@ -106,6 +106,9 @@ public class ChatService {
 
     public NewChatResponse createNewChat(ChatMessageCreateRequest chatMessageRequest, Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
+
+        // 새로운 Chat 생성
+        // todo
         Chat newChat = Chat.builder()
                 .user(user)
                 .title("New Chat")
@@ -123,11 +126,7 @@ public class ChatService {
 
         // AI 서버 호출 (지금은 dummy response)
         String aiResponseContent = callAiServer(userContent);
-//        String aiResponseContent = "test";
-
-        // todo AI 타이틀 연결하기
-        String chatTitle = "ai title";
-//        String chatTitle = callAiServer(aiResponseContent);
+//        String chatTile = callAiServer(aiResponseContent);
         // AI 응답 메시지 생성 및 저장
         ChatMessage aiMessage = ChatMessage.builder()
                 .chat(newChat)
@@ -141,7 +140,7 @@ public class ChatService {
         chatRepository.save(newChat);
 
         return NewChatResponse.builder()
-                .title(chatTitle)
+                .title("test")
                 .chatId(newChat.getId())
                 .aiResponse(ChatMessageResponse.builder()
                         .chatMessageId(aiMessage.getChatMessageId())
@@ -165,7 +164,7 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    protected String callAiServer(String message) {
+    private String callAiServer(String message) {
         Flux<String> responseFlux = chatWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/test")

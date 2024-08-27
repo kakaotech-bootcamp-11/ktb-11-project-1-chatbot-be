@@ -99,11 +99,9 @@ class CommentStarterServiceTest {
 
             List<UpdateCommentRequest> requests = List.of(
                     UpdateCommentRequest.builder()
-                            .id(firstCommentId)
                             .comment("오늘 날씨는 어때?")
                             .build(),
                     UpdateCommentRequest.builder()
-                            .id(secondCommentId)
                             .comment("지금 교육장까지 가면 얼마나 걸릴까?")
                             .build()
             );
