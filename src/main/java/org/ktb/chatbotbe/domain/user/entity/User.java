@@ -19,13 +19,17 @@ public class User extends BaseEntity {
 
     private Long socialId;
 
+    @Column(name = "profile_image")
+    private String profileImage;
+
     @Embedded
     private Address address;
 
     @Builder
-    public User(String nickname, Long socialId) {
+    public User(String nickname, Long socialId, String profileImage) {
         this.nickname = nickname;
         this.socialId = socialId;
+        this.profileImage = profileImage;
     }
 
     public void updateAddress(String street, String city, String state) {
