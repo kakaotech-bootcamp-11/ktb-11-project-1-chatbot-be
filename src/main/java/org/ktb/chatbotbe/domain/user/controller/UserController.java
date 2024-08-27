@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("")
+    @GetMapping("/userinfo")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal OAuth2User principal) {
         Long userId = principal.getAttribute("id");
         UserInfo userInfo = userService.getUserInfo(userId);
-        return ResponseEntity.ok("test");
+        return ResponseEntity.ok(userInfo);
     }
 
     @PostMapping("/address")

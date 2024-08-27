@@ -26,6 +26,7 @@ public class UserService {
 
         return UserInfo.builder()
                 .username(user.getNickname())
+                .profileImage(user.getProfileImage())
                 .build();
     }
 
