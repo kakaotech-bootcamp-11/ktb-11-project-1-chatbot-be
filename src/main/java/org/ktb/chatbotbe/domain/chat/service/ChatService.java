@@ -123,6 +123,8 @@ public class ChatService {
 
         // AI 서버 호출 (지금은 dummy response)
         String aiResponseContent = callAiServer(userContent);
+//        String aiResponseContent = "test";
+
         // todo AI 타이틀 연결하기
         String chatTitle = "ai title";
 //        String chatTitle = callAiServer(aiResponseContent);
