@@ -22,7 +22,7 @@ public class UserService {
     }
 
     public UserInfo getUserInfo(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findBysocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return UserInfo.builder()
                 .username(user.getNickname())
