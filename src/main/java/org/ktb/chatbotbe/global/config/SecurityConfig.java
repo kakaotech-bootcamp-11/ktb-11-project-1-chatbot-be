@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // 인가가 있는 사용자에 대해 접근권한 확인
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/oauth2/**", "/success", "/login/**", "/api/chats", "/api/weather/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/**", "/api/weather/**", "/schedule").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
