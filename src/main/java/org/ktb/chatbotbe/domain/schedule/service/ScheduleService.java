@@ -8,7 +8,7 @@ import org.ktb.chatbotbe.domain.schedule.repository.CampScheduleRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 public class ScheduleService {
     private final CampScheduleRepository scheduleRepository;
 
-    public List<CampScheduleInfo> getMonthEvents(LocalDate date) {
-        LocalDate startDate = date.with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate endDate = date.with(TemporalAdjusters.lastDayOfMonth());
+    public List<CampScheduleInfo> getMonthEvents(YearMonth yearMonth) {
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
         List<CampSchedule> allByMonth = scheduleRepository.findAllByMonth(startDate, endDate);
         Map<LocalDate, List<String>> map = allByMonth.stream()
                 .collect(Collectors.groupingBy(
@@ -36,5 +36,6 @@ public class ScheduleService {
                         .build())
                 .collect(Collectors.toList());
     }
+
 
 }
