@@ -33,9 +33,8 @@ public class UserService {
 
     @Transactional
     public void updateUserAddress(Long userId, AddressUpdateRequest request){
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findBysocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.updateAddress(request.getAddress(), request.getZipNo(), request.getAddrDetail());
-
     }
 
 }
