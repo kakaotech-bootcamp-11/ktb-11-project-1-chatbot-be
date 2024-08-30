@@ -44,6 +44,6 @@ public class User extends BaseEntity {
         if (address != null) {
             return address.toString();
         }
-        return null;
+        return "등록된 주소가 없습니다.";
     }
 }

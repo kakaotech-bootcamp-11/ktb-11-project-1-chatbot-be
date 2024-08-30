@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/setting")
@@ -23,10 +25,12 @@ public class UserController {
     }
 
     @PostMapping("/address")
-    public void setAddress(@AuthenticationPrincipal OAuth2User user,
-                           @RequestBody AddressUpdateRequest requestBody){
+    public ResponseEntity<Map<String, String>> setAddress(@AuthenticationPrincipal OAuth2User user,
+                                                          @RequestBody AddressUpdateRequest requestBody){
         Long userId = user.getAttribute("id");
         userService.updateUserAddress(userId, requestBody);
+
+        return ResponseEntity.ok(Map.of("message", "success"));
     }
 
 }

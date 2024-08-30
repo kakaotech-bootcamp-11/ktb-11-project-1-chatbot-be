@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class AddressUpdateRequest {
-    private String street;
-    private String city;
-    private String state;
+    private String address;
+    private String zipNo;
+    private String addrDetail;
 }

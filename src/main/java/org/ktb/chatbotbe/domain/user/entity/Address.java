@@ -5,22 +5,22 @@ import lombok.Builder;
 
 @Embeddable
 public class Address {
-    private String street;
-    private String city;
-    private String state;
+    private String address;
+    private String zipNo;
+    private String addrDetail;
 
     public Address() {
     }
 
     @Builder
     public Address(String street, String city, String state) {
-        this.street = street;
-        this.city = city;
-        this.state = state;
+        this.address = street;
+        this.zipNo = city;
+        this.addrDetail = state;
     }
 
     @Override
     public String toString() {
-        return state + " " + street + " " + city + " " + street;
+        return address + " " + addrDetail + " " + zipNo;
     }
 }
