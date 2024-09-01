@@ -1,6 +1,7 @@
 package org.ktb.chatbotbe.domain.chat.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/chats")
 @RestController
+@Slf4j
 public class ChatController {
 
     private final ChatService chatService;
@@ -35,11 +38,10 @@ public class ChatController {
         return ResponseEntity.ok(messages);
     }
 
-    @PostMapping("/me/{chatId}/messages")
-    public ResponseEntity<ChatMessageResponse> addChatMessage(@PathVariable Long chatId, @RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
+    @PostMapping(value = "/me/{chatId}/messages", produces = "text/event-stream; charset=euc-kr")
+    public Flux<ChatMessageResponse> addChatMessage(@PathVariable Long chatId, @RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
-        ChatMessageResponse chatMessageResponse = chatService.addChatMessage(chatId, chatMessageRequest, userId);
-        return ResponseEntity.ok(chatMessageResponse);
+        return chatService.addChatMessage(chatId, chatMessageRequest, userId);
     }
 
     @DeleteMapping("/me/{chatId}")
@@ -49,10 +51,16 @@ public class ChatController {
         return ResponseEntity.ok(Map.of("message", "성공적으로 채팅 쓰레드를 삭제했습니다."));
     }
 
+
+    // todo
+    // crateNewChat()는 지금 채팅방 생성과 메시지를 보내는 동작 두 가지를 실행중
+    // 분리하는게 좋아 보임
     @PostMapping("/me/new")
     public ResponseEntity<NewChatResponse> createNewChat(@RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
         NewChatResponse newChatResponse = chatService.createNewChat(chatMessageRequest, userId);
+
         return ResponseEntity.ok(newChatResponse);
     }
+
 }

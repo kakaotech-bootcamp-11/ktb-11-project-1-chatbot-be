@@ -67,7 +67,8 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
-    public ChatMessageResponse addChatMessage(Long chatId, ChatMessageCreateRequest chatMessageRequest, Long userSocialId) {
+    public Flux<ChatMessageResponse> addChatMessage(Long chatId, ChatMessageCreateRequest chatMessageRequest, Long userSocialId) {
+        StringBuilder sb = new StringBuilder();
         User user = userService.findBySocialId(userSocialId);
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid chat ID"));
@@ -84,23 +85,32 @@ public class ChatService {
                 .build();
         chatMessageRepository.save(userMessage);
 
+        return chatWebClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/test/stream")
+                        .build())
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/stream")
+                .bodyValue(String.format("{\"content\":\"%s\"}", userContent))
+                .retrieve()
+                .bodyToFlux(String.class)
+                .map(response -> {
+                    sb.append(response);
 
-        String aiResponseContent = callAiServer(userContent);
-
-        // AI 응답 저장
-        ChatMessage aiMessage = ChatMessage.builder()
-                .chat(chat)
-                .content(aiResponseContent)
-                .isUser(false)
-                .build();
-        chatMessageRepository.save(aiMessage);
-
-        // AI 응답 반환
-        return ChatMessageResponse.builder()
-                .chatMessageId(aiMessage.getChatMessageId())
-                .content(aiResponseContent)
-                .isUser(false)
-                .build();
+                    return ChatMessageResponse.builder()
+                            .content(response)
+                            .isUser(false)
+                            .build();
+                }).doOnComplete(() -> {
+                            chatMessageRepository.save(
+                                    ChatMessage.builder()
+                                            .chat(chat)
+                                            .content(sb.toString())
+                                            .isUser(false)
+                                            .build()
+                            );
+                        }
+                );
     }
 
 
@@ -122,12 +132,11 @@ public class ChatService {
         chatMessageRepository.save(userMessage);
 
         // AI 서버 호출 (지금은 dummy response)
-        String aiResponseContent = callAiServer(userContent);
-//        String aiResponseContent = "test";
+//        String aiResponseContent = callAiServer(userContent);
+        String aiResponseContent = "test";
 
         // todo AI 타이틀 연결하기
-        String chatTitle = "ai title";
-//        String chatTitle = callAiServer(aiResponseContent);
+        String chatTitle = createChatTitle(aiResponseContent);
         // AI 응답 메시지 생성 및 저장
         ChatMessage aiMessage = ChatMessage.builder()
                 .chat(newChat)
@@ -165,15 +174,16 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    protected String callAiServer(String message) {
+    protected String createChatTitle(String message) {
         Flux<String> responseFlux = chatWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/test")
+                        .path("/test")      // todo 채팅 api 완성시 URL
                         .build())
                 .header("Content-Type", "application/json")
                 .bodyValue(String.format("{\"content\":\"%s\"}", message))
                 .retrieve().bodyToFlux(String.class);
-
-        return responseFlux.blockLast();        // 동기적으로 사용
+        String response = responseFlux.blockLast();
+        int maxLength = Math.min(response.length(), 100);  // 응답 길이와 100 중 작은 값 선택
+        return response.substring(0, maxLength);
     }
 }

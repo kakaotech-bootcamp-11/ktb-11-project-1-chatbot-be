@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,7 +18,6 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler successHandler;
     private final OAuth2FailureHandler failureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final AuthenticationEntryPoint entryPoint;
 
     @Value("${spring.security.oauth2.home}")
     private String homepageUrl;
