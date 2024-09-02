@@ -6,7 +6,5 @@ import lombok.Getter;
 @Getter
 @Builder
 public class NewChatResponse {
-    private String title;
-    private Long chatId;
-    private ChatMessageResponse aiResponse;
+    private ChatAIResponse aiResponse;
 }
