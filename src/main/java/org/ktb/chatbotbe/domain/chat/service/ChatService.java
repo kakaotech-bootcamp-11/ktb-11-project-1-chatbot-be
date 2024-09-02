@@ -4,9 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.NewChatResponse;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.*;
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
 import org.ktb.chatbotbe.domain.chat.entity.ChatMessage;
 import org.ktb.chatbotbe.domain.chat.exception.UnauthorizedUserChatException;
@@ -60,9 +58,7 @@ public class ChatService {
         return chatMessages.stream()
                 .filter(chat -> chat.getDeletedAt() == null)
                 .map(message -> ChatMessageResponse.builder()
-                        .chatMessageId(message.getChatMessageId())
                         .content(message.getContent())
-                        .isUser(message.getIsUser())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -98,12 +94,15 @@ public class ChatService {
                     sb.append(response);
 
                     return ChatMessageResponse.builder()
+                            .type(ChatMessageType.MESSAGE)
+                            .chatId(chatId)
                             .content(response)
-                            .isUser(false)
                             .build();
-                }).doOnComplete(() -> {
+                })
+                .doOnComplete(() -> {
                             chatMessageRepository.save(
                                     ChatMessage.builder()
+
                                             .chat(chat)
                                             .content(sb.toString())
                                             .isUser(false)
@@ -113,51 +112,15 @@ public class ChatService {
                 );
     }
 
-
-    public NewChatResponse createNewChat(ChatMessageCreateRequest chatMessageRequest, Long userSocialId) {
+    public Long createNewChat(Long userSocialId){
         User user = userService.findBySocialId(userSocialId);
-        Chat newChat = Chat.builder()
+        Chat chat = Chat.builder()
                 .user(user)
                 .title("New Chat")
                 .build();
-        chatRepository.save(newChat);
 
-        // 사용자의 첫 번째 메시지 생성 및 저장
-        String userContent = chatMessageRequest.getContent();
-        ChatMessage userMessage = ChatMessage.builder()
-                .chat(newChat)
-                .content(userContent)
-                .isUser(true)
-                .build();
-        chatMessageRepository.save(userMessage);
-
-        // AI 서버 호출 (지금은 dummy response)
-//        String aiResponseContent = callAiServer(userContent);
-        String aiResponseContent = "test";
-
-        // todo AI 타이틀 연결하기
-        String chatTitle = createChatTitle(aiResponseContent);
-        // AI 응답 메시지 생성 및 저장
-        ChatMessage aiMessage = ChatMessage.builder()
-                .chat(newChat)
-                .content(aiResponseContent)
-                .isUser(false)
-                .build();
-        chatMessageRepository.save(aiMessage);
-
-        // Chat의 제목을 AI 응답으로 업데이트
-        newChat.updateTitle(aiResponseContent);
-        chatRepository.save(newChat);
-
-        return NewChatResponse.builder()
-                .title(chatTitle)
-                .chatId(newChat.getId())
-                .aiResponse(ChatMessageResponse.builder()
-                        .chatMessageId(aiMessage.getChatMessageId())
-                        .content(aiResponseContent)
-                        .isUser(false)
-                        .build())
-                .build();
+        chatRepository.save(chat);
+        return chat.getId();
     }
 
     public void deleteChat(Long chatId, Long userSocialId) {
@@ -185,5 +148,13 @@ public class ChatService {
         String response = responseFlux.blockLast();
         int maxLength = Math.min(response.length(), 100);  // 응답 길이와 100 중 작은 값 선택
         return response.substring(0, maxLength);
+    }
+
+    public String createTitle(Long chatId, String userMessage) {
+        // todo
+        // ai 서버에 제목 요청
+        // 제목 DB에 저장
+        // return
+        return "test";
     }
 }

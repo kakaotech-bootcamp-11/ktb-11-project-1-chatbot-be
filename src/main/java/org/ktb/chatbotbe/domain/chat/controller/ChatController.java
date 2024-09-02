@@ -3,9 +3,7 @@ package org.ktb.chatbotbe.domain.chat.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.NewChatResponse;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.*;
 import org.ktb.chatbotbe.domain.chat.service.ChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,6 +42,29 @@ public class ChatController {
         return chatService.addChatMessage(chatId, chatMessageRequest, userId);
     }
 
+    @PostMapping(value = "/me/new", produces = "text/event-stream; charset=euc-kr")
+    public Flux<NewChatResponse> createNewChat(@RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
+
+        Long userId = user.getAttribute("id");
+        Long chatId = chatService.createNewChat(userId);
+        Flux<ChatMessageResponse> chatMessageResponseFlux = chatService.addChatMessage(chatId, chatMessageRequest, userId);
+//        String title = chatService.createTitle(chatId, chatMessageRequest.getContent());
+        return chatMessageResponseFlux.map(response -> {
+            return NewChatResponse.builder()
+                    .aiResponse(response)
+                    .build();
+        }).concatWith(Flux.just(NewChatResponse.builder()
+                        .aiResponse(TitleAIResponse.builder()
+                                .chatMessageType(ChatMessageType.TITLE)
+                                .title("test title")
+                                .build())
+                        .build(),
+                NewChatResponse.builder()
+                        .aiResponse(new DoneResponse())
+                        .build())
+        );
+    }
+
     @DeleteMapping("/me/{chatId}")
     public ResponseEntity<Map<String, String>> deleteChat(@AuthenticationPrincipal OAuth2User user, @PathVariable Long chatId) {
         Long userId = user.getAttribute("id");
@@ -51,16 +72,5 @@ public class ChatController {
         return ResponseEntity.ok(Map.of("message", "성공적으로 채팅 쓰레드를 삭제했습니다."));
     }
 
-
-    // todo
-    // crateNewChat()는 지금 채팅방 생성과 메시지를 보내는 동작 두 가지를 실행중
-    // 분리하는게 좋아 보임
-    @PostMapping("/me/new")
-    public ResponseEntity<NewChatResponse> createNewChat(@RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
-        Long userId = user.getAttribute("id");
-        NewChatResponse newChatResponse = chatService.createNewChat(chatMessageRequest, userId);
-
-        return ResponseEntity.ok(newChatResponse);
-    }
 
 }
