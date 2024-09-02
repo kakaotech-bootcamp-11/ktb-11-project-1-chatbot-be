@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -37,9 +38,16 @@ public class ChatController {
     }
 
     @PostMapping(value = "/me/{chatId}/messages", produces = "text/event-stream; charset=euc-kr")
-    public Flux<ChatMessageResponse> addChatMessage(@PathVariable Long chatId, @RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
+    public Flux<NewChatResponse> addChatMessage(@PathVariable Long chatId, @RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
-        return chatService.addChatMessage(chatId, chatMessageRequest, userId);
+        Flux<ChatMessageResponse> responseFlux = chatService.addChatMessage(chatId, chatMessageRequest, userId);
+        return responseFlux.map(response -> {
+            return NewChatResponse.builder()
+                    .aiResponse(response)
+                    .build();
+        }).concatWith(Mono.just(NewChatResponse.builder()
+                .aiResponse(new DoneResponse())
+                .build()));
     }
 
     @PostMapping(value = "/me/new", produces = "text/event-stream; charset=euc-kr")
