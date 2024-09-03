@@ -10,7 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+<<<<<<< HEAD
 import org.springframework.security.web.AuthenticationEntryPoint;
+=======
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,7 +22,10 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler successHandler;
     private final OAuth2FailureHandler failureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+<<<<<<< HEAD
     private final AuthenticationEntryPoint entryPoint;
+=======
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
 
     @Value("${spring.security.oauth2.home}")
     private String homepageUrl;
@@ -35,7 +41,11 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // 인가가 있는 사용자에 대해 접근권한 확인
                 .authorizeHttpRequests((auth) -> auth
+<<<<<<< HEAD
                         .requestMatchers("/oauth2/**", "/success", "/login/**", "/api/chats", "/api/weather/**").permitAll()
+=======
+                        .requestMatchers("/oauth2/**", "/login/**", "/weather/**", "/schedule").permitAll()
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )

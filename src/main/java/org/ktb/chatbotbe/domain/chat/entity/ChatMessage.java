@@ -19,7 +19,11 @@ public class ChatMessage extends BaseEntity {
     @JoinColumn(name = "chat_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Chat chat;
 
+<<<<<<< HEAD
     @Column(length = 500)
+=======
+    @Column(length = 1000)
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
     private String content;
 
     private Boolean isUser;

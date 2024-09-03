@@ -14,7 +14,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+<<<<<<< HEAD
 @RequestMapping("/api/weather")
+=======
+@RequestMapping("/weather")
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
 public class WeatherController {
     private final WeatherService weatherService;
 

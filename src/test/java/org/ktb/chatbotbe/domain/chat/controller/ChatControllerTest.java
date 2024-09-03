@@ -90,6 +90,7 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$[2].title").value("가는데 얼마나 걸려?")); // 세 번째 아이템의 title 필드 검증
     }
 
+<<<<<<< HEAD
     @DisplayName("채팅 기록 가져오기 테스트")
     @Test
     void 채팅_기록_가져오기() throws Exception {
@@ -158,6 +159,76 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.chatMessageId").value(3L))
                 .andExpect(jsonPath("$.isUser").value(false));
     }
+=======
+//    @DisplayName("채팅 기록 가져오기 테스트")
+//    @Test
+//    void 채팅_기록_가져오기() throws Exception {
+//        when(mockUser.getAttribute("id")).thenReturn(1L);
+//        when(chatService.findChatMessagesByChatId(anyLong(), anyLong())).thenReturn(
+//                List.of(
+//                        ChatMessageResponse.builder()
+//                                .chatMessageId(1L)
+//                                .content("오늘 날씨 알려줘")
+//                                .isUser(true)
+//                                .build(),
+//                        ChatMessageResponse.builder()
+//                                .chatMessageId(2L)
+//                                .content("오늘은 비가 올 예정입니다.")
+//                                .isUser(false)
+//                                .build(),
+//                        ChatMessageResponse.builder()
+//                                .chatMessageId(3L)
+//                                .content("교육장까지 가는데 얼마나 걸릴까?")
+//                                .isUser(true)
+//                                .build(),
+//                        ChatMessageResponse.builder()
+//                                .chatMessageId(4L)
+//                                .content("약 35분 걸릴 예정입니다.")
+//                                .isUser(false)
+//                                .build()
+//                )
+//        );
+//
+//
+//        mockMvc.perform(MockMvcRequestBuilders.get("/chats/me/3")
+//                        .session(session)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                ).andExpect(status().isOk())
+//                .andExpect(jsonPath("$.length()").value(4))
+//                .andExpect(jsonPath("$[0].chatMessageId").value(1L))
+//                .andExpect(jsonPath("$[0].content").value("오늘 날씨 알려줘"))
+//                .andExpect(jsonPath("$[1].chatMessageId").value(2L))
+//                .andExpect(jsonPath("$[1].content").value("오늘은 비가 올 예정입니다."))
+//                .andExpect(jsonPath("$[2].chatMessageId").value(3L))
+//                .andExpect(jsonPath("$[2].content").value("교육장까지 가는데 얼마나 걸릴까?"))
+//                .andExpect(jsonPath("$[3].chatMessageId").value(4L))
+//                .andExpect(jsonPath("$[3].content").value("약 35분 걸릴 예정입니다."));
+//    }
+
+//    @DisplayName("채팅 메시지 보내기 테스트")
+//    @Test
+//    void 채팅_메시지_보내기() throws Exception {
+//        ChatMessageResponse response = ChatMessageResponse.builder()
+//                .chatMessageId(3L)
+//                .content("AI 응답")
+//                .isUser(false)
+//                .build();
+//
+//        when(mockUser.getAttribute("id")).thenReturn(1L);
+//        when(chatService.addChatMessage(anyLong(), any(ChatMessageCreateRequest.class), anyLong())).thenReturn(response);
+//        String requestBody = "{\"content\": \"응답해줘\"}";
+//
+//        mockMvc.perform(MockMvcRequestBuilders.post("/chats/me/3/messages")
+//                        .session(session)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(requestBody)
+//                )
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").value("AI 응답"))
+//                .andExpect(jsonPath("$.chatMessageId").value(3L))
+//                .andExpect(jsonPath("$.isUser").value(false));
+//    }
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
 
 
     @DisplayName("채팅방 삭제 테스트")
@@ -177,6 +248,7 @@ class ChatControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("성공적으로 채팅 쓰레드를 삭제했습니다."));
     }
 
+<<<<<<< HEAD
     @DisplayName("새로운 채팅방 생성 테스트")
     @Test
     void 새로운_채팅방_생성() throws Exception {
@@ -206,4 +278,35 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.aiResponse.isUser").value(false))
                 .andDo(print());
     }
+=======
+//    @DisplayName("새로운 채팅방 생성 테스트")
+//    @Test
+//    void 새로운_채팅방_생성() throws Exception {
+//        ChatMessageResponse aiResponse = ChatMessageResponse.builder()
+//                .chatMessageId(2L)
+//                .content("AI 응답")
+//                .isUser(false)
+//                .build();
+//        NewChatResponse response = NewChatResponse.builder()
+//                .title("테스트용 채팅방")
+//                .chatId(1L)
+//                .aiResponse(aiResponse)
+//                .build();
+//        when(mockUser.getAttribute("id")).thenReturn(1L);
+//        when(chatService.createNewChat(any(), anyLong())).thenReturn(response);
+//
+//        String requestBody = "{\"content\": \"응답해줘\"}";
+//        mockMvc.perform(MockMvcRequestBuilders.post("/chats/me/new")
+//                    .session(session)
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .content(requestBody))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.title").value("테스트용 채팅방"))
+//                .andExpect(jsonPath("$.chatId").value(1L))
+//                .andExpect(jsonPath("$.aiResponse.chatMessageId").value(2L))
+//                .andExpect(jsonPath("$.aiResponse.content").value("AI 응답"))
+//                .andExpect(jsonPath("$.aiResponse.isUser").value(false))
+//                .andDo(print());
+//    }
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
 }

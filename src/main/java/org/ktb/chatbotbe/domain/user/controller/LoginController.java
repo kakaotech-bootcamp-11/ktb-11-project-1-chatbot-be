@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
 @RequiredArgsConstructor
 public class LoginController {
     private final UserService userService;

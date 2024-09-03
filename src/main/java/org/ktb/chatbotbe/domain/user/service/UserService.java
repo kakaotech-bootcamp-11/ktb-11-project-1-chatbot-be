@@ -27,14 +27,23 @@ public class UserService {
         return UserInfo.builder()
                 .username(user.getNickname())
                 .profileImage(user.getProfileImage())
+<<<<<<< HEAD
+=======
+                .address(user.getAddress())
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
                 .build();
     }
 
     @Transactional
     public void updateUserAddress(Long userId, AddressUpdateRequest request){
+<<<<<<< HEAD
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.updateAddress(request.getStreet(), request.getCity(), request.getState());
 
+=======
+        User user = userRepository.findBysocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.updateAddress(request.getAddress(), request.getZipNo(), request.getAddrDetail());
+>>>>>>> 5be43d597872c1111545c7c0eea914b27ceb83f6
     }
 
 }
