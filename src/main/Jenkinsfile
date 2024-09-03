@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+  stages {
+    stage('git pull') {
+      steps {
+      git url: 'https://github.com/kakaotech-bootcamp-11/ktb-11-project-1-chatbot-be.git', branch: 'main'
+      }
+    }
+    stage('k8s deploy'){
+      steps {
+        sh '''
+	kubectl apply deployment backend-deployment --image=ktb11chatbot/ktb-11-project-1-chatbot-be
+	#kubectl expose deployment backend-deployment --type=LB or NodePort
+	'''
+	}
+     }
+  }
+}
