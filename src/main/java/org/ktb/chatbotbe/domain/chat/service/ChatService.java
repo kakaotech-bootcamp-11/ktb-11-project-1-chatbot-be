@@ -43,7 +43,7 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
-    public List<ChatMessageResponse> findChatMessagesByChatId(Long chatId, Long userSocialId) {
+    public List<ChatHistory> findChatMessagesByChatId(Long chatId, Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
         Chat userChat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid chat ID"));
@@ -57,7 +57,9 @@ public class ChatService {
 
         return chatMessages.stream()
                 .filter(chat -> chat.getDeletedAt() == null)
-                .map(message -> ChatMessageResponse.builder()
+                .map(message -> ChatHistory.builder()
+                        .chatMessageId(message.getChatMessageId())
+                        .isUser(message.getIsUser())
                         .content(message.getContent())
                         .build())
                 .collect(Collectors.toList());
@@ -102,7 +104,6 @@ public class ChatService {
                 .doOnComplete(() -> {
                             chatMessageRepository.save(
                                     ChatMessage.builder()
-
                                             .chat(chat)
                                             .content(sb.toString())
                                             .isUser(false)

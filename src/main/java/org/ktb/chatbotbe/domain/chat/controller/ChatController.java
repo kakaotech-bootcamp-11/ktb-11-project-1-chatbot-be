@@ -31,9 +31,9 @@ public class ChatController {
     }
 
     @GetMapping("/me/{chatId}")
-    public ResponseEntity<List<ChatMessageResponse>> getChatMessages(@PathVariable Long chatId, @AuthenticationPrincipal OAuth2User user) {
+    public ResponseEntity<List<ChatHistory>> getChatMessages(@PathVariable Long chatId, @AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
-        List<ChatMessageResponse> messages = chatService.findChatMessagesByChatId(chatId, userId);
+        List<ChatHistory> messages = chatService.findChatMessagesByChatId(chatId, userId);
 
         return ResponseEntity.ok(messages);
     }
