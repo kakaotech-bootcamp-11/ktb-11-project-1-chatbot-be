@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: ktb-11-project-1-chatbot-be
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    properties.hibernate:
+      format_sql: false
+    generate-ddl: true
+    show-sql: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    database: mysql
+  security:
+    oauth2:
+      home: ${OAUTH2_HOME}
+      client:
+        registration:
+          kakao:
+            client-id: ${OAUTH2_CLIENT_ID}
+            client-secret: ${OAUTH2_CLIENT_SECRET}
+            client-authentication-method: client_secret_post
+            redirect-uri: ${OAUTH2_REDIRECT_URI}
+            authorization-grant-type: authorization_code
+            client-name: kakao
+            scope:
+              - profile_nickname
+              - profile_image
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+weather:
+  latitude: 37.40013636554196
+  longitude: 127.1067841722373
+  api-key: ${WEATHER_API_KEY}
+t-map:
+  api-key: ${T_MAP_API_KEY}
+api-uri:
+  weather: ${WEATHER_API_URI}
+  ai-server: ${AI_SERVER_URI}
+  traffic-server: ${TRAFFIC_SERVER_URI}
+
+server:
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: none
+  forward-headers-strategy: native
