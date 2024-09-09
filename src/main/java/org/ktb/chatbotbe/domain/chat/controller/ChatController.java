@@ -55,28 +55,6 @@ public class ChatController {
                 ));
     }
 
-//    @PostMapping(value = "/me/new", produces = "text/event-stream; charset=euc-kr")
-//    public Flux<ServerSentEvent<NewChatResponse>> createNewChat(@RequestBody ChatMessageCreateRequest chatMessageRequest, @AuthenticationPrincipal OAuth2User user) {
-//        Long userId = user.getAttribute("id");
-//        Long chatId = chatService.createNewChat(userId);
-//        Flux<ChatMessageResponse> chatMessageResponseFlux = chatService.addChatMessage(chatId, chatMessageRequest, userId);
-////        String title = chatService.createTitle(chatId, chatMessageRequest.getContent());
-//        return chatMessageResponseFlux.map(response -> {
-//                    return NewChatResponse.builder()
-//                            .aiResponse(response)
-//                            .build();
-//                }).map(next -> ServerSentEvent.<NewChatResponse>builder().data(next).build())
-//                .concatWith(Flux.just(NewChatResponse.builder()
-//                                .aiResponse(TitleAIResponse.builder()
-//                                        .chatMessageType(ChatMessageType.TITLE)
-//                                        .title("test title")
-//                                        .build())
-//                                .build(),
-//                        NewChatResponse.builder()
-//                                .aiResponse(new DoneResponse())
-//                                .build())
-//                );
-//    }
 
     @PostMapping(value = "/me/new", produces = "text/event-stream; charset=euc-kr")
     public Flux<ServerSentEvent<NewChatResponse>> createNewChat(@RequestBody ChatMessageCreateRequest chatMessageRequest,
@@ -84,6 +62,7 @@ public class ChatController {
         Long userId = user.getAttribute("id");
         Long chatId = chatService.createNewChat(userId);
         Flux<ChatMessageResponse> chatMessageResponseFlux = chatService.addChatMessage(chatId, chatMessageRequest, userId);
+        String title = chatService.createChatTitle(chatMessageRequest.getContent(), userId, chatId);
 
         // 기존 응답을 NewChatResponse로 변환 후 ServerSentEvent로 래핑
         Flux<ServerSentEvent<NewChatResponse>> eventFlux = chatMessageResponseFlux
@@ -99,7 +78,7 @@ public class ChatController {
                 .data(NewChatResponse.builder()
                         .aiResponse(TitleAIResponse.builder()
                                 .chatMessageType(ChatMessageType.TITLE)
-                                .title("test title")
+                                .title(title)
                                 .build())
                         .build())
                 .build();
@@ -110,6 +89,7 @@ public class ChatController {
                         .build())
                 .build();
 
+        chatService.saveChatTitle(chatId, title);
         // 기존 Flux와 추가 데이터들을 결합하여 반환
         return eventFlux.concatWith(Flux.just(titleResponse, doneResponse));
     }
