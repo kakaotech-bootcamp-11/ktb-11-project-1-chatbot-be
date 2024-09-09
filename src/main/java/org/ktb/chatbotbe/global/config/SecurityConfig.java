@@ -56,7 +56,7 @@ public class SecurityConfig {
                                 )
                                 .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                         .userService(customOAuth2UserService))
-//                                .successHandler(successHandler)
+                                .successHandler(successHandler)
 //                                .failureHandler(failureHandler)
                 )
                 // 로그아웃
