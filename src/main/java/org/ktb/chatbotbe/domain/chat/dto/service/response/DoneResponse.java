@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class DoneResponse implements ChatAIResponse{
-    private final ChatMessageType messageType = ChatMessageType.DONE;
+    private final ChatMessageType type = ChatMessageType.DONE;
 }

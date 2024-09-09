@@ -4,7 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.*;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatHistory;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageType;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
 import org.ktb.chatbotbe.domain.chat.entity.ChatMessage;
 import org.ktb.chatbotbe.domain.chat.exception.UnauthorizedUserChatException;
@@ -15,9 +18,12 @@ import org.ktb.chatbotbe.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -43,7 +49,7 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
-    public List<ChatMessageResponse> findChatMessagesByChatId(Long chatId, Long userSocialId) {
+    public List<ChatHistory> findChatMessagesByChatId(Long chatId, Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
         Chat userChat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid chat ID"));
@@ -57,7 +63,9 @@ public class ChatService {
 
         return chatMessages.stream()
                 .filter(chat -> chat.getDeletedAt() == null)
-                .map(message -> ChatMessageResponse.builder()
+                .map(message -> ChatHistory.builder()
+                        .chatMessageId(message.getChatMessageId())
+                        .isUser(message.getIsUser())
                         .content(message.getContent())
                         .build())
                 .collect(Collectors.toList());
@@ -81,18 +89,22 @@ public class ChatService {
                 .build();
         chatMessageRepository.save(userMessage);
 
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("content", userContent);
+        requestBody.put("user_id", user.getId());
+        requestBody.put("chat_id", chatId);
+
         return chatWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/test/stream")
+                        .path("/conv")
                         .build())
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/stream")
-                .bodyValue(String.format("{\"content\":\"%s\"}", userContent))
+                .bodyValue(requestBody)
                 .retrieve()
                 .bodyToFlux(String.class)
                 .map(response -> {
                     sb.append(response);
-
                     return ChatMessageResponse.builder()
                             .type(ChatMessageType.MESSAGE)
                             .chatId(chatId)
@@ -102,7 +114,6 @@ public class ChatService {
                 .doOnComplete(() -> {
                             chatMessageRepository.save(
                                     ChatMessage.builder()
-
                                             .chat(chat)
                                             .content(sb.toString())
                                             .isUser(false)
@@ -112,7 +123,7 @@ public class ChatService {
                 );
     }
 
-    public Long createNewChat(Long userSocialId){
+    public Long createNewChat(Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
         Chat chat = Chat.builder()
                 .user(user)
@@ -137,24 +148,31 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    protected String createChatTitle(String message) {
-        Flux<String> responseFlux = chatWebClient.post()
+    public String createChatTitle(String message, Long userId, Long chatId) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("content", message);
+        requestBody.put("user_id", userId);
+        requestBody.put("chat_id", chatId);
+
+
+        Mono<Map> responseMono = chatWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/test")      // todo 채팅 api 완성시 URL
+                        .path("/title")      // todo 채팅 api 완성시 URL
                         .build())
                 .header("Content-Type", "application/json")
-                .bodyValue(String.format("{\"content\":\"%s\"}", message))
-                .retrieve().bodyToFlux(String.class);
-        String response = responseFlux.blockLast();
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Map.class);
+        String response = (String) responseMono.block().get("title");
+        log.info(response);
         int maxLength = Math.min(response.length(), 100);  // 응답 길이와 100 중 작은 값 선택
         return response.substring(0, maxLength);
     }
 
-    public String createTitle(Long chatId, String userMessage) {
-        // todo
-        // ai 서버에 제목 요청
-        // 제목 DB에 저장
-        // return
-        return "test";
+    @Transactional
+    public void saveChatTitle(Long chatId, String title) {
+        Chat chat = chatRepository.findById(chatId).orElseThrow();
+        chat.updateTitle(title);
     }
+
 }
