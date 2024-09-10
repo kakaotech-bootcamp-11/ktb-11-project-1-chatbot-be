@@ -5,7 +5,6 @@ pipeline {
         GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
         KANIKO_POD_YAML = '/home/ubuntu/kaniko/kaniko-pod-be.yaml'  // Kaniko Pod YAML 파일 경로
-        DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'  // Docker Hub 리포지토리
     }
     stages {
         stage('Checkout Source Code') {
