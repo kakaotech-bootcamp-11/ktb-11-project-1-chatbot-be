@@ -1,11 +1,11 @@
 pipeline {
     agent none
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('DockerHub-ktb11chatbot')  // Docker Hub 인증 정보
-        GITHUB_TOKEN = credentials('GitHub-Personal-Access-Token')
         DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'
         GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
+        KANIKO_POD_YAML = '/home/ubuntu/kaniko/kaniko-pod-be.yaml'  // Kaniko Pod YAML 파일 경로
+        DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'  // Docker Hub 리포지토리
     }
     stages {
         stage('Checkout Source Code') {
@@ -19,49 +19,33 @@ pipeline {
                 }
             }
         }
-        stage('Build and Push with Kaniko') {
-            agent {
-                kubernetes {
-                    label 'kaniko-build'
-                    defaultContainer 'kaniko'
-                    yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  namespace: ${K8S_NAMESPACE}
-  name: kaniko-backend
-spec:
-  containers:
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
-    args:
-    - --dockerfile=./Dockerfile
-    - --context=git://\$GITHUB_TOKEN@github.com/kakaotech-bootcamp-11/ktb-11-project-1-chatbot-be.git#refs/heads/${GIT_BRANCH}
-    - --destination=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
-    volumeMounts:
-    - name: kaniko-secret
-      mountPath: /kaniko/.docker
-    - name: dockerfile-storage
-      mountPath: /workspace
-  restartPolicy: Never
-  volumes:
-  - name: kaniko-secret
-    secret:
-      secretName: regcred
-      items:
-        - key: .dockerconfigjson
-          path: config.json
-  - name: dockerfile-storage
-    persistentVolumeClaim:
-      claimName: kaniko-pv-claim
-"""
-                }
-            }
-            steps {
-                container('kaniko') {
-                    script {
-                        echo "Building and pushing Docker image: ${DOCKER_REPO}:${GIT_COMMIT_SHORT}"
+        stage('Update Kaniko YAML') {
+                    steps {
+                        script {
+                            // 이미지 태그를 생성하고, kaniko-pod-be.yaml 파일을 동적으로 수정
+                            sh """
+                            sed -i 's|--destination=.*|--destination=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}|' ${KANIKO_POD_YAML}
+                            """
+                        }
                     }
+                }
+        stage('Deploy Kaniko Pod') {
+                    steps {
+                        script {
+                            // 동적으로 수정된 Kaniko Pod YAML 파일을 Kubernetes에 적용
+                            sh """
+                            kubectl apply -f ${KANIKO_POD_YAML} -n ${K8S_NAMESPACE}
+                            """
+                        }
+                    }
+                }
+        stage('Wait for Build Completion') {
+            steps {
+                script {
+                    // Kaniko Pod 빌드 완료 대기
+                    sh """
+                    kubectl wait --for=condition=complete pod/kaniko-backend -n ${K8S_NAMESPACE} --timeout=600s
+                    """
                 }
             }
         }
@@ -80,11 +64,17 @@ spec:
         }
     }
     post {
-        success {
-            echo 'Build, push, and deploy successful!'
-        }
-        failure {
-            echo 'Build or deployment failed. Check logs for details.'
+            success {
+                echo 'Build and push successful!'
+            }
+            failure {
+                echo 'Build or deployment failed. Check logs for details.'
+                script {
+                    // Kaniko Pod의 로그 확인
+                    sh """
+                    kubectl logs pod/kaniko-backend -n ${K8S_NAMESPACE}
+                    """
+            }
         }
     }
 }
