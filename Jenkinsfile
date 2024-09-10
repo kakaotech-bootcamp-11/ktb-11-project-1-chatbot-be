@@ -6,11 +6,22 @@ pipeline {
         DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'
         GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
-        GIT_COMMIT_SHORT = "${env.GIT_COMMIT.take(7)}"  // Git 커밋 ID 앞 7자리
     }
     stages {
         stage('Build and Push with Kaniko') {
-            agent {
+            agent any {
+            steps {
+            //Git 소스 코들르 체크아웃
+            checkout scm
+            script {
+
+            env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}"// Git 커밋 ID 앞 7자리
+            }
+        }
+    }
+    stage('Build and Push with Kaniko') {
+    agent {
                 kubernetes {
                     label 'kaniko-build'
                     defaultContainer 'kaniko'
