@@ -8,20 +8,19 @@ pipeline {
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
     }
     stages {
-        stage('Build and Push with Kaniko') {
-            agent any {
+        stage('Checkout Source Code') {
+            agent any
             steps {
-            //Git 소스 코들르 체크아웃
-            checkout scm
-            script {
-
-            env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-            echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}"// Git 커밋 ID 앞 7자리
+                // Git 소스 코드를 체크아웃
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}" // Git 커밋 ID 앞 7자리
+                }
             }
         }
-    }
-    stage('Build and Push with Kaniko') {
-    agent {
+        stage('Build and Push with Kaniko') {
+            agent {
                 kubernetes {
                     label 'kaniko-build'
                     defaultContainer 'kaniko'
