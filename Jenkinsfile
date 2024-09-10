@@ -19,7 +19,7 @@ pipeline {
             }
         }
         stage('Update Kaniko YAML') {
-            agent { node { label '' }
+            agent { node { label '' } }
                     steps {
                         script {
                             // 이미지 태그를 생성하고, kaniko-pod-be.yaml 파일을 동적으로 수정
@@ -30,7 +30,7 @@ pipeline {
                     }
                 }
         stage('Deploy Kaniko Pod') {
-        agent { node { label '' }
+        agent { node { label '' } }
                     steps {
                         script {
                             // 동적으로 수정된 Kaniko Pod YAML 파일을 Kubernetes에 적용
@@ -41,7 +41,7 @@ pipeline {
                     }
                 }
         stage('Wait for Build Completion') {
-        agent { node { label '' }
+        agent { node { label '' } }
             steps {
                 script {
                     // Kaniko Pod 빌드 완료 대기
@@ -52,7 +52,7 @@ pipeline {
             }
         }
         stage('Deploy to Kubernetes') {
-            agent { node { label '' }
+            agent { node { label '' } }
             steps {
                 script {
                     // Kubernetes 배포
@@ -71,7 +71,7 @@ pipeline {
             }
             failure {
                 echo 'Build or deployment failed. Check logs for details.'
-                agent { node { label '' }
+                agent { node { label '' } }
                 script {
                     // Kaniko Pod의 로그 확인
                     sh """
