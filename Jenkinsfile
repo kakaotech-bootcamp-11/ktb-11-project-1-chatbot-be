@@ -1,7 +1,7 @@
 pipeline {
     agent none
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')  // Docker Hub 인증 정보
+        DOCKERHUB_CREDENTIALS = credentials('DockerHub-ktb11chatbot')  // Docker Hub 인증 정보
         GITHUB_TOKEN = credentials('GitHub-Personal-Access-Token')
         DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'
         GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
