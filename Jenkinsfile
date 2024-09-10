@@ -35,7 +35,7 @@ pipeline {
                         script {
                             // 동적으로 수정된 Kaniko Pod YAML 파일을 Kubernetes에 적용
                             sh """
-                            kubectl apply -f ${KANIKO_POD_YAML} -n ${K8S_NAMESPACE}
+                            kubectl create -f ${KANIKO_POD_YAML} -n ${K8S_NAMESPACE}
                             """
                         }
                     }
@@ -60,6 +60,7 @@ pipeline {
                     kubectl set image deployment/backend-deployment \
                     -n ${K8S_NAMESPACE} backend=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
                     kubectl rollout status deployment/backend-deployment -n ${K8S_NAMESPACE}
+                    kubectl delete -f ${KANIKO_POD_YAML} -n ${K8S_NAMESPACE}
                     """
                 }
             }
