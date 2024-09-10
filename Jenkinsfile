@@ -19,7 +19,7 @@ pipeline {
             }
         }
         stage('Update Kaniko YAML') {
-            agent { label master }
+            agent { label 'master' }
                     steps {
                         script {
                             // 이미지 태그를 생성하고, kaniko-pod-be.yaml 파일을 동적으로 수정
