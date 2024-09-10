@@ -2,6 +2,7 @@ pipeline {
     agent none
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')  // Docker Hub 인증 정보
+        GITHUB_TOKEN = credentials('GitHub-Personal-Access-Token')
         DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'
         GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
@@ -25,7 +26,7 @@ spec:
     image: gcr.io/kaniko-project/executor:latest
     args:
     - --dockerfile=./Dockerfile
-    - --context=git://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@github.com/kakaotech-bootcamp-11/ktb-11-project-1-chatbot-be.git#refs/heads/${GIT_BRANCH}
+    - --context=git://\$GITHUB_TOKEN@github.com/kakaotech-bootcamp-11/ktb-11-project-1-chatbot-be.git#refs/heads/${GIT_BRANCH}
     - --destination=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
     volumeMounts:
     - name: kaniko-secret
