@@ -2,10 +2,9 @@ pipeline {
     agent none
     environment {
         DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'
-        GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
+        GIT_BRANCH = 'main'  // 빌드할 Git 브랜치
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
-
-        KANIKO_POD_YAML = '/var/jenkins_home/kaniko/kaniko-pod-be.yaml'  // Kaniko Pod YAML 파일 경로
+        KANIKO_POD_YAML = '/var/jenkins_home/kaniko/backend-kaniko-ci.yaml'  // Kaniko Pod YAML 파일 경로
     }
     stages {
         stage('Checkout Source Code') {
@@ -57,10 +56,10 @@ pipeline {
             steps {
                 script {
                     //10분 대기
-                    for (int i = 6; i > 0; i--) {
-                                    echo "남은 대기 시간: ${i}분"
-                                    sleep time: 1, unit: 'MINUTES'
-                                }
+//                     for (int i = 6; i > 0; i--) {
+//                                     echo "남은 대기 시간: ${i}분"
+//                                     sleep time: 1, unit: 'MINUTES'
+//                                 }
                     // Kubernetes 배포
                     sh """
                     kubectl set image deployment/backend-deployment \
