@@ -46,7 +46,7 @@ pipeline {
                 script {
                     // Kaniko Pod 빌드 완료 대기
                     sh """
-                    kubectl wait --for=condition=completed pod/kaniko-backend -n ${K8S_NAMESPACE} --timeout=600s
+                    kubectl wait --for=condition=terminated pod/kaniko-backend -n ${K8S_NAMESPACE} --timeout=600s
                     """
                 }
             }
