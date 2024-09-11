@@ -40,21 +40,23 @@ pipeline {
                         }
                     }
                 }
-        stage('Wait for Build Completion') {
-        agent { label '' }
-            steps {
-                script {
-                    // Kaniko Pod 빌드 완료 대기
-                    sh """
-                    kubectl wait --for=condition=terminated pod/kaniko-backend -n ${K8S_NAMESPACE} --timeout=600s
-                    """
-                }
-            }
-        }
+//         stage('Wait for Build Completion') {
+//         agent { label '' }
+//             steps {
+//                 script {
+//                     // Kaniko Pod 빌드 완료 대기
+//                     sh """
+//                     kubectl wait --for=condition=completed pod/kaniko-backend -n ${K8S_NAMESPACE} --timeout=600s
+//                     """
+//                 }
+//             }
+//         }
         stage('Deploy to Kubernetes') {
             agent { label '' }
             steps {
                 script {
+                    //10분 대기
+                    sleep time: 10, unit: "MINUTES"
                     // Kubernetes 배포
                     sh """
                     kubectl set image deployment/backend-deployment \
