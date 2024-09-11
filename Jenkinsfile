@@ -56,7 +56,10 @@ pipeline {
             steps {
                 script {
                     //10분 대기
-                    sleep time: 10, unit: "MINUTES"
+                    for (int i = 10; i > 0; i--) {
+                                    echo "남은 대기 시간: ${i}분"
+                                    sleep time: 1, unit: 'MINUTES'
+                                }
                     // Kubernetes 배포
                     sh """
                     kubectl set image deployment/backend-deployment \
