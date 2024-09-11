@@ -4,6 +4,7 @@ pipeline {
         DOCKER_REPO = 'ktb11chatbot/ktb-11-project-1-chatbot-be'
         GIT_BRANCH = 'feature/jenkins'  // 빌드할 Git 브랜치
         K8S_NAMESPACE = 'devops-tools'  // 배포할 네임스페이스
+
         KANIKO_POD_YAML = '/var/jenkins_home/kaniko/kaniko-pod-be.yaml'  // Kaniko Pod YAML 파일 경로
     }
     stages {
@@ -56,7 +57,7 @@ pipeline {
             steps {
                 script {
                     //10분 대기
-                    for (int i = 10; i > 0; i--) {
+                    for (int i = 6; i > 0; i--) {
                                     echo "남은 대기 시간: ${i}분"
                                     sleep time: 1, unit: 'MINUTES'
                                 }
@@ -64,7 +65,7 @@ pipeline {
                     sh """
                     kubectl set image deployment/backend-deployment \
                     -n ${K8S_NAMESPACE} backend=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
-                    kubectl rollout status deployment/backend-deployment -n ${K8S_NAMESPACE}
+                    kubectl rollout status deployment/backend-deployment -n ktb-chatbot
                     kubectl delete -f ${KANIKO_POD_YAML} -n ${K8S_NAMESPACE}
                     """
                 }
