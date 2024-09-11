@@ -64,7 +64,7 @@ pipeline {
                     // Kubernetes 배포
                     sh """
                     kubectl set image deployment/backend-deployment \
-                    -n ${K8S_NAMESPACE} backend=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
+                    -n ktb-chatbot backend=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
                     kubectl rollout status deployment/backend-deployment -n ktb-chatbot
                     kubectl delete -f ${KANIKO_POD_YAML} -n ${K8S_NAMESPACE}
                     """
@@ -82,7 +82,7 @@ pipeline {
                 script {
                     // Kaniko Pod의 로그 확인
                     sh """
-                    kubectl logs pod/kaniko-backend -n ${K8S_NAMESPACE}
+                    kubectl logs kaniko-backend -n ${K8S_NAMESPACE}
                     """
             }
         }
