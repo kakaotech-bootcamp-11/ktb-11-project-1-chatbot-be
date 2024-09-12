@@ -2,4 +2,4 @@ spring:
   application:
     name: ktb-11-project-1-chatbot-be
   profiles:
-    active: local
+    active: prod
