@@ -52,7 +52,6 @@ dependencies {
 
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
