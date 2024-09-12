@@ -21,6 +21,7 @@ public class ChatCustomRepositoryImpl implements ChatCustomRepository {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(chat.deletedAt.isNull());
         builder.and(chat.user.eq(user));
+
         return jpaQueryFactory.selectFrom(chat)
                 .where(builder)
                 .orderBy(chat.createdAt.desc())

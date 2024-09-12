@@ -11,6 +11,7 @@ import org.ktb.chatbotbe.domain.chat.dto.service.response.strategy.TitleAIRespon
 import org.ktb.chatbotbe.domain.chat.service.ChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,7 @@ public class ChatController {
     public ResponseEntity<List<ChatHistory>> getChatMessages(@PathVariable Long chatId, @AuthenticationPrincipal OAuth2User user) {
         Long userId = user.getAttribute("id");
         List<ChatHistory> messages = chatService.findChatMessagesByChatId(chatId, userId);
+
 
         return ResponseEntity.ok(messages);
     }

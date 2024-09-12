@@ -1,5 +1,6 @@
 package org.ktb.chatbotbe.domain.weather.service;
 
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class WeatherService {
         List<WeatherInfoPerThreeHour> after = convertWeeklyWeatherInfo(response, 7);
         return new DailyWeatherResponse(now, after);
     }
+
 
     public List<WeeklyWeatherResponse> getWeekWeather() {
         // 내일부터 5일 (오늘: 월) , 데이터 : [화, 수, 목, 금, 토]

@@ -8,6 +8,9 @@ import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatHistory;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.strategy.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageType;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
+
+
+
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
 import org.ktb.chatbotbe.domain.chat.entity.ChatMessage;
 import org.ktb.chatbotbe.domain.chat.exception.UnauthorizedUserChatException;
@@ -49,6 +52,7 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
+
     public List<ChatHistory> findChatMessagesByChatId(Long chatId, Long userSocialId) {
         User user = userService.findBySocialId(userSocialId);
         Chat userChat = chatRepository.findById(chatId)
@@ -88,6 +92,7 @@ public class ChatService {
                 .isUser(true)
                 .build();
         chatMessageRepository.save(userMessage);
+
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("content", userContent);
@@ -169,10 +174,10 @@ public class ChatService {
         return response.substring(0, maxLength);
     }
 
+
     @Transactional
     public void saveChatTitle(Long chatId, String title) {
         Chat chat = chatRepository.findById(chatId).orElseThrow();
         chat.updateTitle(title);
     }
-
 }

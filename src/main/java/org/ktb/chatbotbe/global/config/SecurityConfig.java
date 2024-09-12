@@ -51,7 +51,6 @@ public class SecurityConfig {
                                                 // baseUri로 들어오는 요청을 redirectionEndpoint에 설정된 곳으로 리디렉트
                                                 // default -> {baseUrl}
                                                 .baseUri("/login/oauth2/code")
-
 //                                        .baseUri("/test")
                                 )
                                 .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
@@ -70,5 +69,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }
