@@ -1,4 +1,4 @@
-package org.ktb.chatbotbe.domain.chat.dto.service.response;
+package org.ktb.chatbotbe.domain.chat.dto.service.response.strategy;
 
 import lombok.Builder;
 import lombok.Getter;

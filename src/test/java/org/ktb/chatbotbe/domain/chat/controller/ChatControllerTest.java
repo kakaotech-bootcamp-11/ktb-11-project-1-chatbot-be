@@ -4,9 +4,9 @@
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
 //import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
-//import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
+//import org.ktb.chatbotbe.domain.chat.dto.service.response.strategy.ChatMessageResponse;
 //import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
-//import org.ktb.chatbotbe.domain.chat.dto.service.response.NewChatResponse;
+//import org.ktb.chatbotbe.domain.chat.dto.service.response.strategy.NewChatResponse;
 //import org.ktb.chatbotbe.domain.chat.service.ChatService;
 //import org.mockito.Mockito;
 //import org.springframework.beans.factory.annotation.Autowired;
