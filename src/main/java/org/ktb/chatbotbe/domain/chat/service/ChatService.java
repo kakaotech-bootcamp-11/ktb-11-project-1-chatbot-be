@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatHistory;
-import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageResponse;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.strategy.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageType;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
 import org.ktb.chatbotbe.domain.chat.entity.Chat;

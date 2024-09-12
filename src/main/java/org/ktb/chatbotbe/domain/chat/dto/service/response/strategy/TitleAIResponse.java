@@ -1,11 +1,12 @@
-package org.ktb.chatbotbe.domain.chat.dto.service.response;
+package org.ktb.chatbotbe.domain.chat.dto.service.response.strategy;
 
 
 import lombok.Builder;
 import lombok.Getter;
+import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageType;
 
 @Getter
-public class TitleAIResponse implements ChatAIResponse{
+public class TitleAIResponse implements ChatAIResponse {
     private ChatMessageType chatMessageType;
     private String title;
 
