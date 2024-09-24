@@ -1,111 +1,96 @@
 pipeline {
-    agent none
+    agent any
     environment {
-        DOCKER_REPO = "ktb11chatbot/ktb-11-project-1-chatbot-be"
-        GIT_BRANCH = 'main'  // 빌드할 Git 브랜치
-        JENKINS_NAMESPACE = 'devops-tools'  // kaniko로 build 할때 사용할 네임스페이스 보통 jenkins와 같은 namespace에서 함
-        KANIKO_POD_YAML = '/var/jenkins_home/kaniko/backend-kaniko-ci.yaml' // Kaniko Pod YAML 파일 경로
-        // KANIKO_POD_YAML NFS.dir path 생성후에 그 안에 Kaniko-ci.yaml을 넣어줘야 함
-        KANIKO_POD_NAME = 'kaniko-beckend'
-        DEPLOYMENT_NAMESPCE = 'ktb-chatbot'
-        DEPLOYMENT_NAME = 'backend-deployment'
-        DEPLOYMENT_CONTAINER_NAME = 'backend'
-    }
+            DOCKER_REPO = "ktb11chatbot/ktb-11-project-1-chatbot-be"
+            GIT_BRANCH = 'main'  // 빌드할 Git 브랜치
+            JENKINS_NAMESPACE = 'devops-tools'  // kaniko로 build 할때 사용할 네임스페이스 보통 jenkins와 같은 namespace에서 함
+            KANIKO_POD_YAML = '/var/jenkins_home/kaniko/backend-kaniko-ci.yaml' // Kaniko Pod YAML 파일 경로
+            // KANIKO_POD_YAML NFS.dir path 생성후에 그 안에 Kaniko-ci.yaml을 넣어줘야 함
+            KANIKO_POD_NAME = 'kaniko-beckend'
+            DEPLOYMENT_NAMESPCE = 'ktb-chatbot'
+            DEPLOYMENT_NAME = 'backend-deployment'
+            DEPLOYMENT_CONTAINER_NAME = 'backend'
+        }
     stages {
         stage('Checkout Source Code') {
-            agent any
             steps {
-                // Git 소스 코드를 체크아웃
+                // Git 소스 코드 체크아웃
                 checkout scm
                 script {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}" // Git 커밋 ID 앞 7자리를 tag로 쓸 예정
+                    echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}" // Git 커밋 ID의 앞 7자를 태그로 사용
                 }
             }
         }
         stage('Update Kaniko YAML') {
-            agent { label '' }
-                    steps {
-                        script {
-                            // 이미지 태그를 생성하고, kaniko-ci.yaml 파일에서 build해서 push registry value 덮어쓰기 tag 포함
-                            sh """
-                            sed -i 's|--destination=.*|--destination=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}",|' ${KANIKO_POD_YAML}
-                            """
-                        }
-                    }
-                }
-        stage('Deploy Kaniko Pod') {
-       agent { label '' }
-                    steps {
-                        script {
-                            // 동적으로 수정된 Kaniko Pod YAML 파일을 Kubernetes에 적용
-                            sh """
-                            kubectl create -f ${KANIKO_POD_YAML} -n ${JENKINS_NAMESPACE}
-                            """
-                        }
-                    }
-                }
-        stage('Deploy to Kubernetes') {
-            agent { label '' }
             steps {
                 script {
-                    //6분 대기
-                    for (int i = 6; i > 0; i--) {
-                                    echo "남은 대기 시간: ${i}분"
-                                    sleep time: 1, unit: 'MINUTES'
-                                }
-                    // Kubernetes set image로 배포
+                    // Kaniko YAML 파일에서 이미지 태그 업데이트
+                    sh """
+                    sed -i 's|--destination=.*|--destination=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}",|' ${KANIKO_POD_YAML}
+                    """
+                }
+            }
+        }
+        stage('Deploy Kaniko Pod') {
+            steps {
+                script {
+                    // 기존 Kaniko Pod 삭제 후 새로운 Kaniko Pod 배포
+                    sh """
+                    kubectl delete pod ${KANIKO_POD_NAME} -n ${JENKINS_NAMESPACE} --ignore-not-found
+                    kubectl create -f ${KANIKO_POD_YAML} -n ${JENKINS_NAMESPACE}
+                    """
+                }
+            }
+        }
+        stage('Wait for Kaniko Build') {
+            steps {
+                script {
+                    // Kaniko Pod가 완료될 때까지 대기
+                    timeout(time: 15, unit: 'MINUTES') {
+                        waitUntil {
+                            def status = sh(script: "kubectl get pod ${KANIKO_POD_NAME} -n ${JENKINS_NAMESPACE} -o jsonpath='{.status.phase}'", returnStdout: true).trim()
+                            echo "Kaniko Pod Status: ${status}"
+                            return (status == 'Succeeded') || (status == 'Failed')
+                        }
+                    }
+                    // 최종 상태 확인
+                    def finalStatus = sh(script: "kubectl get pod ${KANIKO_POD_NAME} -n ${JENKINS_NAMESPACE} -o jsonpath='{.status.phase}'", returnStdout: true).trim()
+                    if (finalStatus != 'Succeeded') {
+                        error "Kaniko build failed with status: ${finalStatus}"
+                    }
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Kubernetes에 이미지 배포
                     sh """
                     kubectl set image deployment/${DEPLOYMENT_NAME} \
-                    -n ${DEPLOYMENT_NAMESPCE} ${DEPLOYMENT_CONTAINER_NAME}=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
-                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPCE}
+                    -n ${DEPLOYMENT_NAMESPACE} ${DEPLOYMENT_CONTAINER_NAME}=docker.io/${DOCKER_REPO}:${GIT_COMMIT_SHORT}
+                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${DEPLOYMENT_NAMESPACE}
                     """
                 }
             }
         }
     }
-    post {
-            success {
-                echo 'Build and push successful!'
-                withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
-                        discordSend description: """
-                        제목 : ${currentBuild.displayName}
-                        결과 : ${currentBuild.result}
-                        실행 시간 : ${currentBuild.duration / 1000}s
-                        로그 : ${kanikolog.take(1500)} //1500자 이내로 kaniko build 한 로그 기록 출려하도록 함
-                        """,
-                        link: env.BUILD_URL, result: currentBuild.currentResult,
-                        title: "${env.JOB_NAME} : ${currentBuild.displayName} 성공",
-                        webhookURL: "$DISCORD"
-            }
-            steps {
-                script {
-                    // Kaniko Pod 삭제
-                    sh """
-                    kubectl delete -f ${KANIKO_POD_YAML} -n ${JENKINS_NAMESPACE}
-                    """
-                }
-            }
-            failure {
-                echo 'Build or deployment failed. Check logs for details.'
-                withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
-                                        discordSend description: """
-                                        제목 : ${currentBuild.displayName}
-                                        결과 : ${currentBuild.result}
-                                        실행 시간 : ${currentBuild.duration / 1000}s
-                                        로그 : ${kanikolog.take(1500)} //1500자 이내로 kaniko build 한 로그 기록 출려하도록 함
-                                        """,
-                                        link: env.BUILD_URL, result: currentBuild.currentResult,
-                                        title: "${env.JOB_NAME} : ${currentBuild.displayName} 실패",
-                                        webhookURL: "$DISCORD"
-                            }
-                script {
-                    // Kaniko Pod의 로그 확인
-                    sh """
-                    kubectl logs ${KANIKO_POD_NAME} -n ${JENKINS_NAMESPACE}
-                    kubectl delete -f ${KANIKO_POD_YAML} -n ${JENKINS_NAMESPACE}
-                    """
-            }
-        }
-    }
-}
+   post {
+           success {
+               echo 'Build and push successful!'
+               withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
+                   discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_SHORT}",
+                               description: "Build #${env.BUILD_NUMBER} 성공 ✅",
+                               webhookURL: DISCORD
+               }
+           }
+           failure {
+               echo 'Build or deployment failed. Check logs for details.'
+               withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
+                   discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_SHORT}",
+                               description: "Build #${env.BUILD_NUMBER} 실패 ❌",
+                               webhookURL: DISCORD
+               }
+           }
+       }
+   }
