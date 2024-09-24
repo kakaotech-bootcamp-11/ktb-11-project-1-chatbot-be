@@ -1,6 +1,5 @@
 package org.ktb.chatbotbe.domain.chat.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.domain.chat.dto.controller.request.ChatMessageCreateRequest;
@@ -8,7 +7,6 @@ import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatHistory;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.strategy.ChatMessageResponse;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatMessageType;
 import org.ktb.chatbotbe.domain.chat.dto.service.response.ChatResponse;
-
 
 
 import org.ktb.chatbotbe.domain.chat.entity.Chat;
@@ -19,6 +17,7 @@ import org.ktb.chatbotbe.domain.chat.repository.ChatRepository;
 import org.ktb.chatbotbe.domain.user.entity.User;
 import org.ktb.chatbotbe.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -107,13 +106,13 @@ public class ChatService {
                 .header("Accept", "application/stream")
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToFlux(String.class)
+                .bodyToFlux(Map.class)
                 .map(response -> {
                     sb.append(response);
                     return ChatMessageResponse.builder()
                             .type(ChatMessageType.MESSAGE)
                             .chatId(chatId)
-                            .content(response)
+                            .content((String) response.get("text"))
                             .build();
                 })
                 .doOnComplete(() -> {
@@ -159,10 +158,9 @@ public class ChatService {
         requestBody.put("user_id", userId);
         requestBody.put("chat_id", chatId);
 
-
         Mono<Map> responseMono = chatWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/title")      // todo 채팅 api 완성시 URL
+                        .path("/title")
                         .build())
                 .header("Content-Type", "application/json")
                 .bodyValue(requestBody)
