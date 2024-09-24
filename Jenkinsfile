@@ -6,7 +6,7 @@ pipeline {
             JENKINS_NAMESPACE = 'devops-tools'  // kaniko로 build 할때 사용할 네임스페이스 보통 jenkins와 같은 namespace에서 함
             KANIKO_POD_YAML = '/var/jenkins_home/kaniko/backend-kaniko-ci.yaml' // Kaniko Pod YAML 파일 경로
             // KANIKO_POD_YAML NFS.dir path 생성후에 그 안에 Kaniko-ci.yaml을 넣어줘야 함
-            KANIKO_POD_NAME = 'kaniko-beckend'
+            KANIKO_POD_NAME = 'kaniko-backend'
             DEPLOYMENT_NAMESPCE = 'ktb-chatbot'
             DEPLOYMENT_NAME = 'backend-deployment'
             DEPLOYMENT_CONTAINER_NAME = 'backend'
