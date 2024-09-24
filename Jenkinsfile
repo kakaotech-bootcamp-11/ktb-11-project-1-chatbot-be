@@ -4,7 +4,7 @@ pipeline {
         DOCKER_REPO = "ktb11chatbot/ktb-11-project-1-chatbot-be"
         GIT_BRANCH = 'main'  // 빌드할 Git 브랜치
         JENKINS_NAMESPACE = 'devops-tools'  // kaniko로 build 할때 사용할 네임스페이스 보통 jenkins와 같은 namespace에서 함
-        KANIKO_POD_YAML = '/var/jenkins_home/kaniko/kaniko-ci.yaml' // Kaniko Pod YAML 파일 경로
+        KANIKO_POD_YAML = '/var/jenkins_home/kaniko/backend-kaniko-ci.yaml' // Kaniko Pod YAML 파일 경로
         // KANIKO_POD_YAML NFS.dir path 생성후에 그 안에 Kaniko-ci.yaml을 넣어줘야 함
         KANIKO_POD_NAME = 'kaniko-beckend'
         DEPLOYMENT_NAMESPCE = 'ktb-chatbot'
@@ -78,7 +78,6 @@ pipeline {
                         title: "${env.JOB_NAME} : ${currentBuild.displayName} 성공",
                         webhookURL: "$DISCORD"
             }
-            agent { label '' }
             steps {
                 script {
                     // Kaniko Pod 삭제
@@ -100,7 +99,6 @@ pipeline {
                                         title: "${env.JOB_NAME} : ${currentBuild.displayName} 실패",
                                         webhookURL: "$DISCORD"
                             }
-                agent { label '' }
                 script {
                     // Kaniko Pod의 로그 확인
                     sh """
