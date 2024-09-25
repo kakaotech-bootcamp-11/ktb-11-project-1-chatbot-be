@@ -7,7 +7,7 @@ pipeline {
             KANIKO_POD_YAML = '/var/jenkins_home/kaniko/backend-kaniko-ci.yaml' // Kaniko Pod YAML 파일 경로
             // KANIKO_POD_YAML NFS.dir path 생성후에 그 안에 Kaniko-ci.yaml을 넣어줘야 함
             KANIKO_POD_NAME = 'kaniko-backend'
-            DEPLOYMENT_NAMESPCE = 'ktb-chatbot'
+            DEPLOYMENT_NAMESPACE = 'ktb-chatbot'
             DEPLOYMENT_NAME = 'backend-deployment'
             DEPLOYMENT_CONTAINER_NAME = 'backend'
         }
