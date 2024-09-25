@@ -108,11 +108,12 @@ public class ChatService {
                 .retrieve()
                 .bodyToFlux(Map.class)
                 .map(response -> {
-                    sb.append(response);
+                    String text = (String) response.get("text");
+                    sb.append(text);
                     return ChatMessageResponse.builder()
                             .type(ChatMessageType.MESSAGE)
                             .chatId(chatId)
-                            .content((String) response.get("text"))
+                            .content(text)
                             .build();
                 })
                 .doOnComplete(() -> {
