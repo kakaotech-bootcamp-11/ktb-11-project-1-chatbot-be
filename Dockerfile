@@ -1,5 +1,5 @@
 # 1단계: 빌드 환경 설정
-FROM amazoncorretto:17 AS build
+FROM amazoncorretto:17-alpine AS build
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -22,7 +22,7 @@ COPY ./ /app
 RUN ./gradlew build --no-daemon -x test
 
 # 3단계: 최종 실행 단계
-FROM amazoncorretto:17
+FROM amazoncorretto:17-alpine
 
 # 빌드 단계에서 생성된 JAR 파일을 최종 이미지로 복사
 COPY --from=build /app/build/libs/*.jar /app/
