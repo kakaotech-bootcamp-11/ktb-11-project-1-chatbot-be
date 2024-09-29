@@ -84,17 +84,27 @@ pipeline {
             success {
                 echo 'Build and push successful!'
                 withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
-                    discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_MESSAGE}, ID : ${env.GIT_COMMIT_SHORT}",
-                                description: "Build #${env.BUILD_NUMBER} 성공 ✅",
-                                webhookURL: DISCORD
+                    discordSend title: "빌드 성공: ${env.JOB_NAME} 🎉",
+                                            description: """
+                                            **커밋 메시지**: `${env.GIT_COMMIT_MESSAGE}`
+                                            **커밋 ID**: `${env.GIT_COMMIT_SHORT}`
+                                            **빌드 번호**: `${env.BUILD_NUMBER}`
+                                            **상태**: 🎉 **성공**
+                                            """,
+                                            webhookURL: DISCORD
                 }
             }
             failure {
                 echo 'Build or deployment failed. Check logs for details.'
                 withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
-                    discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_MESSAGE}, ID : ${env.GIT_COMMIT_SHORT}",
-                                description: "Build #${env.BUILD_NUMBER} 실패 ❌",
-                                webhookURL: DISCORD
+                    discordSend title: " 빌드 실패: ${env.JOB_NAME} 👎",
+                                                        description: """
+                                                        **커밋 메시지**: `${env.GIT_COMMIT_MESSAGE}`
+                                                        **커밋 ID**: `${env.GIT_COMMIT_SHORT}`
+                                                        **빌드 번호**: `#${env.BUILD_NUMBER}`
+                                                        **상태**: 👎 **실패**
+                                                        """,
+                                                        webhookURL: DISCORD
                 }
             }
         }
