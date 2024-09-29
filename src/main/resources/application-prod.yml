@@ -36,6 +36,18 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+  # Redis 세션 설정 추가
+  session:
+    store-type: redis  # 세션 저장소를 Redis로 지정
+    timeout: 30m
+    redis:
+      flush-mode: on-save  # 세션 변경 시에만 Redis에 반영
+      namespace: spring:session  # Redis 내에 세션 데이터를 저장할 네임스페이스
+  data:
+    redis:
+      host: redis.ktb-chatbot.svc.cluster.local
+      port: 6379
+      timeout: 6000
 weather:
   latitude: 37.40013636554196
   longitude: 127.1067841722373
