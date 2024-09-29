@@ -19,9 +19,13 @@ pipeline {
                     script {
                         env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                         echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}" // Git 커밋 ID의 앞 7자를 태그로 사용
+
+                        env.GIT_COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        echo "Git Commit Message: ${env.GIT_COMMIT_MESSAGE}"
                     }
                 }
             }
+            /*
             stage('Update Kaniko YAML') {
                 steps {
                     script {
@@ -74,12 +78,13 @@ pipeline {
                     }
                 }
             }
+            */
         }
         post {
             success {
                 echo 'Build and push successful!'
                 withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
-                    discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_SHORT}",
+                    discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_MESSAGE}, ID : ${env.GIT_COMMIT_SHORT}",
                                 description: "Build #${env.BUILD_NUMBER} 성공 ✅",
                                 webhookURL: DISCORD
                 }
@@ -87,7 +92,7 @@ pipeline {
             failure {
                 echo 'Build or deployment failed. Check logs for details.'
                 withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
-                    discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_SHORT}",
+                    discordSend title: "${env.JOB_NAME} : ${env.GIT_COMMIT_MESSAGE}, ID : ${env.GIT_COMMIT_SHORT}",
                                 description: "Build #${env.BUILD_NUMBER} 실패 ❌",
                                 webhookURL: DISCORD
                 }
