@@ -25,7 +25,6 @@ pipeline {
                     }
                 }
             }
-            /*
             stage('Update Kaniko YAML') {
                 steps {
                     script {
@@ -78,7 +77,6 @@ pipeline {
                     }
                 }
             }
-            */
         }
         post {
             success {
