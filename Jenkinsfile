@@ -20,7 +20,7 @@ pipeline {
                         env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                         echo "Current Git Commit Short: ${env.GIT_COMMIT_SHORT}" // Git 커밋 ID의 앞 7자를 태그로 사용
 
-                        env.GIT_COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        env.GIT_COMMIT_MESSAGE = sh(script: 'git log --no-merges -1 --pretty=%B', returnStdout: true).trim()
                         echo "Git Commit Message: ${env.GIT_COMMIT_MESSAGE}"
                     }
                 }
