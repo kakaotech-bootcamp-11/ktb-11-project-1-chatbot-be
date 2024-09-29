@@ -86,7 +86,7 @@ pipeline {
                                             description: """
                                             **커밋 메시지**: `${env.GIT_COMMIT_MESSAGE}`
                                             **커밋 ID**: `${env.GIT_COMMIT_SHORT}`
-                                            **빌드 번호**: `${env.BUILD_NUMBER}`
+                                            **빌드 번호**: `#${env.BUILD_NUMBER}`
                                             **상태**: 🎉 **성공**
                                             """,
                                             webhookURL: DISCORD
