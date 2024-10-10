@@ -1,31 +1,25 @@
 package org.ktb.chatbotbe.global.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ktb.chatbotbe.global.oauth.CustomOAuth2UserService;
-import org.ktb.chatbotbe.global.oauth.handler.OAuth2FailureHandler;
 import org.ktb.chatbotbe.global.oauth.handler.OAuth2SuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
     private final OAuth2SuccessHandler successHandler;
-    private final OAuth2FailureHandler failureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+
 
     @Value("${spring.security.oauth2.home}")
     private String homepageUrl;
@@ -33,7 +27,6 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         // 경로별 인가작업
         http
                 .cors(AbstractHttpConfigurer::disable)
@@ -45,7 +38,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
-//                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())  // Custom entry point 설정
+                )
                 .oauth2Login((oauth) -> oauth
                                 .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
                                                 // baseUri로 들어오는 요청을 redirectionEndpoint에 설정된 곳으로 리디렉트
@@ -56,7 +51,6 @@ public class SecurityConfig {
                                 .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                         .userService(customOAuth2UserService))
                                 .successHandler(successHandler)
-//                                .failureHandler(failureHandler)
                 )
                 // 로그아웃
                 .logout(logout -> logout
