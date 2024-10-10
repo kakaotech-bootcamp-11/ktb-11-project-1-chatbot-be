@@ -1,5 +1,6 @@
 package org.ktb.chatbotbe.domain.schedule.controller;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.ktb.chatbotbe.domain.schedule.dto.CampScheduleInfo;
 import org.ktb.chatbotbe.domain.schedule.service.ScheduleService;
@@ -31,6 +32,11 @@ public class ScheduleController {
         }
 
         return ResponseEntity.ok(calendarService.getMonthEvents(day));
+    }
+
+    @GetMapping("/exception")
+    public ResponseEntity<String> getMonthEvents(){
+        throw new RuntimeException("Something went wrong");
     }
 }
 

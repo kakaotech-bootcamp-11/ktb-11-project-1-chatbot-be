@@ -35,6 +35,7 @@ public class SecurityConfig {
                 // 인가가 있는 사용자에 대해 접근권한 확인
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/oauth2/**", "/login/**", "/weather/**", "/schedule").permitAll()
+                        .requestMatchers("/restaurant/**", "/schedule/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )

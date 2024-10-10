@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.naming.AuthenticationException;
 
@@ -25,7 +26,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleException(MethodArgumentNotValidException e) {
         log.error(e.getMessage(), e);
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().code(HttpStatus.BAD_REQUEST.value()).message(e.getMessage()).build());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleException(MethodArgumentTypeMismatchException e) {
+        log.error(e.getMessage(), e);
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().code(HttpStatus.BAD_REQUEST.value()).message(e.getMessage()).build());
     }
 
     // 인증 예외 처리
@@ -35,6 +42,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse.builder().message("Unauthorized: " + e.getMessage()).build());
     }
+
 
     // 접근 권한 예외 처리
     @ExceptionHandler(AccessDeniedException.class)
@@ -49,7 +57,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("An error occurred: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse.builder().message("Internal server error: " + e.getMessage()).build());
+                .body(ErrorResponse.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).message("Internal server error: " + e.getMessage()).build());
     }
 
 }
