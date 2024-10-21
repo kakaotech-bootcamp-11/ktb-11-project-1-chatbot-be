@@ -17,12 +17,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User findBySocialId(Long socialId) {
-        return userRepository.findBysocialId(socialId)
+        return userRepository.findBySocialId(socialId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     public UserInfo getUserInfo(Long userId) {
-        User user = userRepository.findBysocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findBySocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return UserInfo.builder()
                 .username(user.getNickname())
@@ -33,7 +33,7 @@ public class UserService {
 
     @Transactional
     public void updateUserAddress(Long userId, AddressUpdateRequest request){
-        User user = userRepository.findBysocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findBySocialId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.updateAddress(request.getAddress(), request.getZipNo(), request.getAddrDetail());
     }
 

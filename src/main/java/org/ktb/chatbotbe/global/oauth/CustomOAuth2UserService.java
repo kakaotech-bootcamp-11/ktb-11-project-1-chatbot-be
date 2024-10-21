@@ -39,7 +39,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private User getUser(Map<String, Object> attributes) {
         Long socialId = (Long) attributes.get("id");
         Map<String, String> properties = (Map<String, String>) attributes.get("properties");
-        User findUser = userRepository.findBysocialId(socialId).orElse(null);
+        User findUser = userRepository.findBySocialId(socialId).orElse(null);
 
         if (findUser == null) {
             User createUser = User.builder()
@@ -49,25 +49,34 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .build();
             userRepository.save(createUser);
             commentStarterRepository.saveAll(
-                    List.of(
-                            CommentStarter.builder()
-                                    .comment("오늘 날씨에 맞는 음식 추천해줘")
-                                    .user(createUser)
-                                    .build(),
-                            CommentStarter.builder()
-                                    .comment("집 어떻게 가야할지 추천해줘")
-                                    .user(createUser)
-                                    .build(),
-                            CommentStarter.builder()
-                                    .comment("가장 빠른 코딩테스트 날짜가 언제야?")
-                                    .user(createUser)
-                                    .build())
-                    );
+                    createDefaultCommentStarters(createUser)
+            );
 
             return createUser;
         }
 
         return findUser;
+    }
+
+    private List<CommentStarter> createDefaultCommentStarters(User createUser) {
+        // todo
+        // 대화스타터 수정
+        // "오늘 날씨에 맞는 음식 추천해줘" -> 오늘 병가 쓰고 싶어
+        // "집 어떻게 가야할지 추천해줘" -> 통합 신청 센터 링크 알려줘
+        // "가장 빠른 코딩테스트 날짜가 언제야?" -> 이번주 일정 알려줘
+        return List.of(
+                CommentStarter.builder()
+                        .comment("오늘 병가 쓰고 싶어")
+                        .user(createUser)
+                        .build(),
+                CommentStarter.builder()
+                        .comment("통합 신청 센터 링크 알려줘")
+                        .user(createUser)
+                        .build(),
+                CommentStarter.builder()
+                        .comment("이번주 일정 알려줘")
+                        .user(createUser)
+                        .build());
     }
 
 }

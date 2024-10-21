@@ -1,8 +1,10 @@
 package org.ktb.chatbotbe.domain.schedule.controller;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.ktb.chatbotbe.domain.schedule.dto.CampScheduleInfo;
 import org.ktb.chatbotbe.domain.schedule.service.ScheduleService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +22,21 @@ public class ScheduleController {
     private final ScheduleService calendarService;
 
     @GetMapping
-    public ResponseEntity<List<CampScheduleInfo>> getMonthEvents(@RequestParam(name = "day", required = false) YearMonth day) {
+    public ResponseEntity<List<CampScheduleInfo>> getMonthEvents(
+            @RequestParam(name = "day", required = false)
+            @DateTimeFormat(pattern = "yyyy-MM")
+            YearMonth day
+    ) {
         if (day == null) {
             day = YearMonth.now();
         }
 
         return ResponseEntity.ok(calendarService.getMonthEvents(day));
+    }
+
+    @GetMapping("/exception")
+    public ResponseEntity<String> getMonthEvents(){
+        throw new RuntimeException("Something went wrong");
     }
 }
 
