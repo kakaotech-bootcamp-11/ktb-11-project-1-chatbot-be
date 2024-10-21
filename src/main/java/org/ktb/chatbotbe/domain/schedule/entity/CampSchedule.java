@@ -16,4 +16,7 @@ public class CampSchedule {
     private String name;
 
     private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
+    private CampEventTag tag;
 }
