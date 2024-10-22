@@ -44,8 +44,8 @@ public class SecurityConfig {
                 )
                 .oauth2Login((oauth) -> oauth
                                 .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
-                                                // baseUri로 들어오는 요청을 redirectionEndpoint에 설정된 곳으로 리디렉트
-                                                // default -> {baseUrl}
+                                        // baseUri로 들어오는 요청을 redirectionEndpoint에 설정된 곳으로 리디렉트
+                                        // default -> {baseUrl}
                                                 .baseUri("/login/oauth2/code")
 //                                        .baseUri("/test")
                                 )

@@ -11,10 +11,11 @@ import java.util.List;
 @Data
 public class CampScheduleInfo implements Serializable {
     LocalDate date;
-    List<String> description;
+    List<ScheduleInfo> scheduleList;
+
     @Builder
-    public CampScheduleInfo(LocalDate date, List<String> description) {
+    public CampScheduleInfo(LocalDate date, List<ScheduleInfo> scheduleList) {
         this.date = date;
-        this.description = description;
+        this.scheduleList = scheduleList;
     }
 }
